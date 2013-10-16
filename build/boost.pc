@@ -1,0 +1,11 @@
+# https://svn.boost.org/trac/boost/ticket/1094
+prefix=/opt/local
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: Boost
+Description: Boost
+Version: 0.0.1
+Libs: -L${libdir}
+Cflags: -I${includedir}
