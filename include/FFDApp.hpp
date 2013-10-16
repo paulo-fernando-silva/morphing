@@ -1,0 +1,165 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (C) 2013 Paulo Silva <paulo.jnkml@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+#ifndef FFDAPP_HPP
+#define FFDAPP_HPP
+
+#include <QIcon>
+#include <QString>
+#include <QMainWindow>
+#include <boost/shared_ptr.hpp>
+
+
+class FFDWidget;
+class Blender;
+class FileManager;
+
+class QTimer;
+class QLabel;
+class QAction;
+class QWidget;
+class QSpinBox;
+class QCheckBox;
+class QGroupBox;
+class QRadioButton;
+
+
+class FFDApp : public QMainWindow {
+	Q_OBJECT
+public:
+    typedef boost::shared_ptr<FileManager> FileManagerPtr;
+
+    FFDApp();
+    ~FFDApp();
+
+    bool loadProject(const QString& uri);
+    bool saveProject(const QString& uri) const;
+    bool saveAnimation(const QString& uri) const;
+
+    inline Blender* mix() const {
+        return _mix;
+    }
+
+    inline FFDWidget* src() const {
+        return _src;
+    }
+
+    inline FFDWidget* dst() const {
+        return _dst;
+    }
+
+    inline const FileManagerPtr& mgr() const {
+        return _file_mgr;
+    }
+
+public slots:
+    void openImages();
+    void openProject();
+    void saveProject();
+    void saveProjectAs();
+    void saveProjectAs(const QString& uri);
+    void saveProjectChanges();
+    void saveAnimation();
+    void toggleAnimation();
+    void clear();
+    void about();
+    void aboutQt();
+    void update();
+    void fps(int n);
+    void len(int n);
+    void resolutionChanged(int n);
+    void toggleMesh();
+    void bidirectionality();
+    void clearModifications();
+
+
+protected:
+    void closeEvent(QCloseEvent*);
+
+
+private:
+    void setupTimer();
+
+    void setupToolbar();
+    void setupMenus();
+
+    bool load(const QString& uri,
+              const QString& mesh,
+              FFDWidget* const ffdw);
+
+    void setupUI();
+    void initUI();
+    void layoutUI();
+
+    QWidget* setupParamsUI(QWidget* const parent);
+    void initParamsUI();
+    void layoutParamsUI();
+
+    QString selectedAnimMask() const;
+
+
+private:
+    Blender* _mix;
+    FFDWidget* _src;
+    FFDWidget* _dst;
+
+    QTimer* _frame;
+
+    QMenu* _file_menu;
+    QMenu* _help_menu;
+
+    QAction* _about;
+    QAction* _about_qt;
+
+    QAction* _new;
+    QAction* _load_img;
+    QAction* _load_prj;
+    QAction* _save_prj;
+    QAction* _save_anim;
+    QAction* _play;
+    QAction* _mesh;
+
+    QIcon _play_icon;
+    QIcon _pause_icon;
+
+    QWidget* _params_ui;
+    QLabel* _mesh_lbl;
+    QSpinBox* _mesh_sb;
+
+    QGroupBox* _anim_opts;
+    QLabel* _fps_lbl;
+    QSpinBox* _fps_sb;
+    QLabel* _len_lbl;
+    QSpinBox* _len_sb;
+    QRadioButton* _gif;
+    QRadioButton* _mpg;
+    QCheckBox* _bidirectional;
+
+    FileManagerPtr _file_mgr;
+
+    QString _prj_uri;
+};
+
+
+#endif // FFDAPP_HPP

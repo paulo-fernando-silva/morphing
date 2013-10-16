@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="icon">../img/icon.png</file>
+        <file alias="new">../img/new.png</file>
+        <file alias="open_img">../img/open_img.png</file>
+        <file alias="open_prj">../img/open_prj.png</file>
+        <file alias="save_img">../img/save_img.png</file>
+        <file alias="save_prj">../img/save_prj.png</file>
+        <file alias="play">../img/play.png</file>
+        <file alias="pause">../img/pause.png</file>
+        <file alias="mesh">../img/mesh.png</file>
+    </qresource>
+</RCC>
