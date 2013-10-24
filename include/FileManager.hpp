@@ -31,6 +31,7 @@
 #include <cassert>
 
 
+class QPixmap;
 class QGLWidget;
 
 
@@ -53,6 +54,8 @@ public:
     ~FileManager();
 
     void clear();
+
+    bool add(const QPixmap& img, const QString& uri);
 
     void add(const Resource& resource);
 

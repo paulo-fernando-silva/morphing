@@ -81,5 +81,4 @@ void drawBlended(const Mesh& src_mesh,
                  const int dst_tex,
                  const float t);
 
-
 #endif // UTILS_HPP

@@ -35,6 +35,7 @@ class FFDWidget;
 class Blender;
 class FileManager;
 
+class QUrl;
 class QTimer;
 class QLabel;
 class QAction;
@@ -43,6 +44,7 @@ class QSpinBox;
 class QCheckBox;
 class QGroupBox;
 class QRadioButton;
+class QXmlStreamReader;
 
 
 class FFDApp : public QMainWindow {
@@ -54,8 +56,10 @@ public:
     ~FFDApp();
 
     bool loadProject(const QString& uri);
-    bool saveProject(const QString& uri) const;
-    bool saveAnimation(const QString& uri) const;
+    bool saveProject(const QString& uri);
+
+    bool loadImage(const QString& uri);
+    bool saveAnimation(const QString& uri);
 
     inline Blender* mix() const {
         return _mix;
@@ -72,10 +76,6 @@ public:
     inline const FileManagerPtr& mgr() const {
         return _file_mgr;
     }
-
-
-    void saveProjectAs(const QString& uri);
-    void saveAnimationAs(const QString& uri);
 
 
 public slots:
@@ -98,6 +98,10 @@ public slots:
     void bidirectionality();
     void clearModifications();
 
+    void dragEnterEvent(QDragEnterEvent* event);
+    void dropEvent(QDropEvent* event);
+    void dropEvent(QDropEvent* event, QWidget* sender);
+
 
 protected:
     void closeEvent(QCloseEvent*);
@@ -114,15 +118,29 @@ private:
               const QString& mesh,
               FFDWidget* const ffdw);
 
-    void setupUI();
-    void initUI();
-    void layoutUI();
+    void setupDataUI();
+    void initDataUI();
+    void layoutDataUI();
+    void connectDataUI();
 
     QWidget* setupOptionsUI(QWidget* const parent);
     void initOptionsUI();
     void layoutOptionsUI();
 
     QString selectedAnimMask() const;
+
+    void handleUrls(QDropEvent* event);
+    void process(const QUrl& url);
+    void handleImage(QDropEvent* event);
+
+    bool parseProject(QXmlStreamReader& xml);
+
+    void onLoadResult(const bool success, const QString& uri);
+    void onSaveResult(const bool success, const QString& uri);
+    void onResult(const bool success,
+                  const QString& action,
+                  const QString& uri);
+
 
 
 private:
@@ -165,6 +183,7 @@ private:
     QString _prj_uri;
     QString _img_uri;
     QString _anim_uri;
+    QString _img_filters;
 };
 
 

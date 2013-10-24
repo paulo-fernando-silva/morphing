@@ -125,6 +125,9 @@ signals:
 
     void destructiveChange();
 
+    void dragEnter(QDragEnterEvent* event);
+    void dropped(QDropEvent* event, QWidget* sender);
+
 
 public slots:
     void select(int i);
@@ -137,6 +140,9 @@ protected:
 
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
+
+    void dragEnterEvent(QDragEnterEvent* event);
+    void dropEvent(QDropEvent* event);
 
 
 private:

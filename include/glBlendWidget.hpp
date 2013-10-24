@@ -70,12 +70,18 @@ public:
 signals:
     void blendFactorChanged(float t);
 
+    void dragEnter(QDragEnterEvent* event);
+    void dropped(QDropEvent* event);
+
 
 public slots:
     void blendFactor(float t);
 
 
 protected:
+    void dragEnterEvent(QDragEnterEvent* event);
+    void dropEvent(QDropEvent* event);
+
     void initializeGL();
     void resizeGL(int width, int height);
 

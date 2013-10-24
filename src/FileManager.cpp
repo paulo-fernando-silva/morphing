@@ -64,14 +64,9 @@ void FileManager::add(const Resource& resource) {
 }
 
 
-bool FileManager::loadImage(const QString& uri) {
-    if(uri.size() == 0)
-        return false;
-
+bool FileManager::add(const QPixmap& img, const QString& uri) {
     if(ctx()->context() != QGLContext::currentContext())
         ctx()->makeCurrent();
-
-    QPixmap img(uri);
 
     if(img.isNull())
         return false;
@@ -79,5 +74,13 @@ bool FileManager::loadImage(const QString& uri) {
     add(Resource(uri, ctx()->bindTexture(img)));
 
     return true;
+}
+
+
+bool FileManager::loadImage(const QString& uri) {
+    if(not uri.isEmpty())
+        return add(QPixmap(uri), uri);
+
+    return false;
 }
 

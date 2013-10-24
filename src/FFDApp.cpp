@@ -30,10 +30,12 @@
 #include "glBlendWidget.hpp"
 #include "SignalBlocker.hpp"
 
+#include <QUrl>
 #include <QFile>
 #include <QLabel>
 #include <QTimer>
 #include <QAction>
+#include <QPixmap>
 #include <QMenuBar>
 #include <QSpinBox>
 #include <QToolBar>
@@ -48,7 +50,9 @@
 #include <QStringList>
 #include <QSpacerItem>
 #include <QMessageBox>
+#include <QImageReader>
 #include <QRadioButton>
+#include <QDragEnterEvent>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
@@ -103,6 +107,9 @@ const QString PRJ_EXT("xml");
 const QString GIF_EXT("gif");
 const QString MPG_EXT("mpg");
 
+const QString SAVE_ACT("save");
+const QString LOAD_ACT("load");
+
 const QString DEFAULT_DIR("./");
 const QString URL("https://sites.google.com/site/paulofernandosilva");
 const QString LINK("<a href='" + URL + "'>my website</a>");
@@ -121,14 +128,27 @@ const QString ABOUT("<h4>2D Free Form Deformation morphing </h4>"
                     "</p>");
 
 
-QString path(const QString& uri) {
-    if(uri.isEmpty())
-        return DEFAULT_DIR;
+/* *****************************************************************************
+ * Utilities forward declaration.
+ * ****************************************************************************/
+QString path(const QString& uri);
 
-    return QFileInfo(uri).absolutePath();
-}
+void write(const Tag tag,
+           const FFDWidget* const w,
+           QXmlStreamWriter& xml);
+
+void loadProjectAttributes(QXmlStreamReader& xml, FFDApp* app);
+
+bool isImage(const QString& ext);
+
+bool isProject(const QString& ext);
+
+QString imageFilters();
 
 
+/* *****************************************************************************
+ * FFDApp implementation.
+ * ****************************************************************************/
 FFDApp::FFDApp():
     _mix(0),
     _src(0),
@@ -155,12 +175,15 @@ FFDApp::FFDApp():
     _fps_sb(0),
     _len_lbl(0),
     _len_sb(0),
-    _bidirectional(0)
+    _bidirectional(0),
+    _img_filters(imageFilters())
 {
     setupTimer();
     setupToolbar();
     setupMenus();
-	setupUI();
+    setupDataUI();
+
+    setAcceptDrops(true);
 
     clear();
 
@@ -173,14 +196,24 @@ FFDApp::~FFDApp() {
 }
 
 
-void FFDApp::setupUI() {
-    setCentralWidget(new QWidget);
-    initUI();
-    layoutUI();
+void FFDApp::clear() {
+    _src->clear();
+    _dst->clear();
+    _mix->clear();
+    _file_mgr->clear();
+    clearModifications();
 }
 
 
-void FFDApp::initUI() {
+void FFDApp::setupDataUI() {
+    setCentralWidget(new QWidget);
+    initDataUI();
+    connectDataUI();
+    layoutDataUI();
+}
+
+
+void FFDApp::initDataUI() {
     _mix = new Blender(centralWidget(), "Interpolated Image");
     glBlendWidget* const bw(_mix->widget());
 
@@ -196,6 +229,13 @@ void FFDApp::initUI() {
 
     _mix->widget()->src(src_wgt);
     _mix->widget()->dst(dst_wgt);
+}
+
+
+void FFDApp::connectDataUI() {
+    glBlendWidget* const bln_wgt(_mix->widget());
+    glFFDWidget* const src_wgt(_src->widget());
+    glFFDWidget* const dst_wgt(_dst->widget());
 
     connect(src_wgt, SIGNAL(selectionChanged(int)), dst_wgt, SLOT(select(int)));
     connect(dst_wgt, SIGNAL(selectionChanged(int)), src_wgt, SLOT(select(int)));
@@ -209,10 +249,24 @@ void FFDApp::initUI() {
             this, SLOT(resolutionChanged(int)));
     connect(dst_wgt, SIGNAL(resolutionChanged(int)),
             this, SLOT(resolutionChanged(int)));
+
+    connect(src_wgt, SIGNAL(dragEnter(QDragEnterEvent*)),
+            this, SLOT(dragEnterEvent(QDragEnterEvent*)));
+    connect(bln_wgt, SIGNAL(dragEnter(QDragEnterEvent*)),
+            this, SLOT(dragEnterEvent(QDragEnterEvent*)));
+    connect(dst_wgt, SIGNAL(dragEnter(QDragEnterEvent*)),
+            this, SLOT(dragEnterEvent(QDragEnterEvent*)));
+
+    connect(src_wgt, SIGNAL(dropped(QDropEvent*, QWidget*)),
+            this, SLOT(dropEvent(QDropEvent*, QWidget*)));
+    connect(bln_wgt, SIGNAL(dropped(QDropEvent*)),
+            this, SLOT(dropEvent(QDropEvent*)));
+    connect(dst_wgt, SIGNAL(dropped(QDropEvent*, QWidget*)),
+            this, SLOT(dropEvent(QDropEvent*, QWidget*)));
 }
 
 
-void FFDApp::layoutUI() {
+void FFDApp::layoutDataUI() {
     QGridLayout* const layout(new QGridLayout);
     layout->setColumnMinimumWidth(0, DEFAULT_IMG_SIZE_PX);
     layout->setColumnMinimumWidth(1, DEFAULT_IMG_SIZE_PX);
@@ -340,23 +394,12 @@ void FFDApp::len(int n) {
 }
 
 
-void write(const Tag tag,
-           const FFDWidget* const w,
-           QXmlStreamWriter& xml)
-{
-    assert(w != 0);
 
-    xml.writeStartElement(TAG[tag]);
-        xml.writeAttribute(TAG[URI_TAG], w->selectionURI());
-        std::stringstream out;
-        w->widget()->saveMesh(out);
-        xml.writeCharacters(QString(out.str().c_str()));
-    xml.writeEndElement();
-}
-
-
-bool FFDApp::saveProject(const QString& uri) const {
+bool FFDApp::saveProject(const QString& uri) {
     assert(not uri.isEmpty());
+
+    _prj_uri = uri;
+
     QFile file(uri);
 
     if(!file.open(QIODevice::WriteOnly)) {
@@ -406,29 +449,9 @@ bool FFDApp::load(const QString& uri,
 }
 
 
-void loadProjectAttributes(QXmlStreamReader& xml, FFDApp* app) {
-    assert(app != 0);
-
-    if(xml.atEnd())
-        return;
-
-    const QString& fps_str(xml.attributes().value(TAG[FPS_TAG]).toString());
-    const QString& len_str(xml.attributes().value(TAG[LEN_TAG]).toString());
-
-    bool fps_ok(false), len_ok(false);
-    const int fps(fps_str.toInt(&fps_ok));
-    const int len(len_str.toInt(&len_ok));
-
-    if(fps_ok and fps >= 0)
-        app->fps(fps);
-
-    if(len_ok and len > 0)
-        app->len(len);
-}
-
-
 bool FFDApp::loadProject(const QString& uri) {
     assert(not uri.isEmpty());
+
     QFile file(uri);
     if(!file.open(QIODevice::ReadOnly)) {
         statusBar()->showMessage("Failed to open '" + uri + "\'");
@@ -441,7 +464,21 @@ bool FFDApp::loadProject(const QString& uri) {
         return false;
     }
 
+    clear();
+    _prj_uri = uri;
+
+    if(parseProject(xml))
+        return true;
+
+    clear();
+
+    return false;
+}
+
+
+bool FFDApp::parseProject(QXmlStreamReader& xml) {
     bool error(false);
+
     xml.readNextStartElement(); // PROJECT
     loadProjectAttributes(xml, this);
     while(!xml.atEnd())
@@ -454,19 +491,7 @@ bool FFDApp::loadProject(const QString& uri) {
                 error = error or not load(uri, xml.readElementText(), _dst);
         }
 
-    if(error)
-        clear();
-
     return not error;
-}
-
-
-void FFDApp::clear() {
-    _src->clear();
-    _dst->clear();
-    _mix->clear();
-    _file_mgr->clear();
-    clearModifications();
 }
 
 
@@ -490,22 +515,29 @@ void FFDApp::update() {
 
 void FFDApp::openImages() {
     const QStringList& files(QFileDialog::getOpenFileNames(
-        this, "Open:", path(_img_uri), "Image Files (*.png *.jpg *.bmp)"));
+        this, "Open:", path(_img_uri), "Image Files (" + _img_filters + ")"));
 
     unsigned files_loaded(0);
     const QStringList::const_iterator& end(files.end());
     for(QStringList::const_iterator i(files.begin()); i != end; ++i)
-        if(not i->isEmpty() and mgr()->loadImage(*i))
+        if(not i->isEmpty() and loadImage(*i))
             ++files_loaded;
         else
             QMessageBox::warning(this, tr("Load Image"),
                                 "Unable to open '" + *i +"'",
                                 QMessageBox::Ok);
 
-    if(files_loaded != 0)
-        _img_uri = mgr()->back().uri;
-
     statusBar()->showMessage(QString::number(files_loaded) + " Files Loaded");
+}
+
+
+bool FFDApp::loadImage(const QString& uri) {
+    if(mgr()->loadImage(uri)) {
+        _img_uri = uri;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -513,29 +545,8 @@ void FFDApp::openProject() {
     const QString& uri(QFileDialog::getOpenFileName(
         this, "Open:", path(_prj_uri), "Files (*." + PRJ_EXT + ")"));
 
-    if(uri.isEmpty())
-        return;
-
-    clear();
-
-    const QString& msg("project from '" + uri + "'");
-
-    if(loadProject(uri)) {
-        _prj_uri = uri;
-        statusBar()->showMessage("Loaded " + msg, MSG_DELAY);
-    } else
-        statusBar()->showMessage("Failed to load " + msg);
-}
-
-
-void FFDApp::saveProjectAs(const QString& uri) {
-    const QString msg("project to '" + uri + "'");
-
-    if(saveProject(uri)) {
-        _prj_uri = uri;
-        statusBar()->showMessage("Saved " + msg, MSG_DELAY);
-    } else
-        statusBar()->showMessage("Failed to save " + msg);
+    if(not uri.isEmpty())
+        onLoadResult(loadProject(uri), uri);
 }
 
 
@@ -544,7 +555,7 @@ void FFDApp::saveProjectAs() {
         this, "Save as:", path(_prj_uri), "Files (*." + PRJ_EXT + ")"));
 
     if(not uri.isEmpty())
-        saveProjectAs(uri);
+        onSaveResult(saveProject(uri), uri);
 }
 
 
@@ -552,7 +563,7 @@ void FFDApp::saveProject() {
     if(_prj_uri.isEmpty())
         saveProjectAs();
     else
-        saveProjectAs(_prj_uri);
+        onSaveResult(saveProject(_prj_uri), _prj_uri);
 }
 
 
@@ -563,7 +574,7 @@ void FFDApp::saveAnimation() {
     if(_anim_uri.isEmpty())
         saveAnimationAs();
     else
-        saveAnimationAs(_anim_uri);
+        onSaveResult(saveAnimation(_anim_uri), _anim_uri);
 }
 
 
@@ -581,21 +592,7 @@ void FFDApp::saveAnimationAs() {
                            "Animation (" + selectedAnimMask() + ")"));
 
     if(not uri.isEmpty())
-        saveAnimationAs(uri);
-}
-
-
-void FFDApp::saveAnimationAs(const QString& uri) {
-    const QString& msg("animation to '" + uri + "'");
-
-    if(uri.isEmpty())
-        return;
-
-    if(saveAnimation(uri)) {
-        _anim_uri = uri;
-       statusBar()->showMessage("Saved " + msg, MSG_DELAY);
-    } else
-        statusBar()->showMessage("Failed to save " + msg);
+        onSaveResult(saveAnimation(uri), uri);
 }
 
 
@@ -609,8 +606,13 @@ void FFDApp::aboutQt() {
 }
 
 
-bool FFDApp::saveAnimation(const QString& uri) const {
-    return _mix->save(uri);
+bool FFDApp::saveAnimation(const QString& uri) {
+    if(_mix->save(uri)) {
+        _anim_uri = uri;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -743,3 +745,167 @@ void FFDApp::closeEvent(QCloseEvent*) {
         saveProjectChanges();
 }
 
+
+void FFDApp::dragEnterEvent(QDragEnterEvent* event) {
+    // Not allowing raw data, unless I save it somehow in the project file.
+    if(event->mimeData()->hasUrls()/* or event->mimeData()->hasImage()*/)
+        event->acceptProposedAction();
+}
+
+
+void FFDApp::dropEvent(QDropEvent* event) {
+    dropEvent(event, 0);
+}
+
+
+void FFDApp::dropEvent(QDropEvent* event, QWidget* /*sender*/) {
+    if(event->mimeData()->hasUrls())
+        handleUrls(event);
+
+    if(event->mimeData()->hasImage())
+        handleImage(event);
+}
+
+
+void FFDApp::handleUrls(QDropEvent* event) {
+    typedef QList<QUrl> Urls;
+    typedef Urls::ConstIterator ConstIterator;
+
+    const Urls& urls(event->mimeData()->urls());
+
+    const ConstIterator end(urls.end());
+    for(ConstIterator url(urls.begin()); url != end; ++url)
+        process(*url);
+}
+
+
+void FFDApp::process(const QUrl& url) {
+    if(url.isLocalFile()) {
+        const QString& uri(url.toLocalFile());
+        const QFileInfo file(uri);
+        const QString& ext(file.suffix());
+
+        if(isProject(ext))
+            onLoadResult(loadProject(uri), uri);
+        else if(isImage(ext))
+            onLoadResult(loadImage(uri), uri);
+        else
+            statusBar()->showMessage(uri + " is not supported.");
+    }
+}
+
+
+void FFDApp::handleImage(QDropEvent* event) {
+    assert(event and event->mimeData()->hasImage());
+
+    const QString uri;
+    const QImage& image(qvariant_cast<QImage>(event->mimeData()->imageData()));
+    const bool loaded(mgr()->add(QPixmap::fromImage(image), uri));
+
+    onLoadResult(loaded, uri);
+}
+
+
+void FFDApp::onResult(const bool success,
+                      const QString& action,
+                      const QString& uri)
+{
+    const QString& msg('\'' + uri + "' " + action);
+
+    if(success)
+        statusBar()->showMessage(msg + " ok.", MSG_DELAY);
+    else
+        statusBar()->showMessage(msg + " failed.");
+}
+
+
+void FFDApp::onLoadResult(const bool success, const QString& uri) {
+    onResult(success, LOAD_ACT, uri);
+}
+
+
+void FFDApp::onSaveResult(const bool success, const QString& uri) {
+    onResult(success, SAVE_ACT, uri);
+}
+
+
+/* *****************************************************************************
+ * Extra aux stuff
+ * ****************************************************************************/
+QString path(const QString& uri) {
+    if(uri.isEmpty())
+        return DEFAULT_DIR;
+
+    return QFileInfo(uri).absolutePath();
+}
+
+
+void write(const Tag tag,
+           const FFDWidget* const w,
+           QXmlStreamWriter& xml)
+{
+    assert(w != 0);
+
+    xml.writeStartElement(TAG[tag]);
+        xml.writeAttribute(TAG[URI_TAG], w->selectionURI());
+        std::stringstream out;
+        w->widget()->saveMesh(out);
+        xml.writeCharacters(QString(out.str().c_str()));
+    xml.writeEndElement();
+}
+
+
+void loadProjectAttributes(QXmlStreamReader& xml, FFDApp* app) {
+    assert(app != 0);
+
+    if(xml.atEnd())
+        return;
+
+    const QString& fps_str(xml.attributes().value(TAG[FPS_TAG]).toString());
+    const QString& len_str(xml.attributes().value(TAG[LEN_TAG]).toString());
+
+    bool fps_ok(false), len_ok(false);
+    const int fps(fps_str.toInt(&fps_ok));
+    const int len(len_str.toInt(&len_ok));
+
+    if(fps_ok and fps >= 0)
+        app->fps(fps);
+
+    if(len_ok and len > 0)
+        app->len(len);
+}
+
+
+bool isImage(const QString& ext) {
+    typedef QList<QByteArray> FileFormats;
+    typedef FileFormats::ConstIterator ConstIterator;
+    const FileFormats& formats(QImageReader::supportedImageFormats());
+
+    const ConstIterator end(formats.end());
+    for(ConstIterator i(formats.begin()); i != end; ++i)
+        if(ext == *i)
+            return true;
+
+    return false;
+}
+
+
+bool isProject(const QString& ext) {
+    const QString lowercase_ext(ext.toLower());
+    return lowercase_ext == PRJ_EXT;
+}
+
+
+QString imageFilters() {
+    typedef QList<QByteArray> FileFormats;
+    typedef FileFormats::ConstIterator ConstIterator;
+    const FileFormats& formats(QImageReader::supportedImageFormats());
+
+    QString filters;
+
+    const ConstIterator end(formats.end());
+    for(ConstIterator i(formats.begin()); i != end; ++i)
+        filters += " *." + *i;
+
+    return filters;
+}

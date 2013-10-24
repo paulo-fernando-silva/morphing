@@ -47,7 +47,6 @@ const color POINT_COLOR(0.0f, 1.0f, 0.0f, 1.0f);
 const color POINT_SELECTION_COLOR(1.0f, 0.0f, 0.0f, 1.0f);
 
 
-
 unsigned totalNumberOfIndices(const unsigned width) {
     assert(width != 0);
     const unsigned seg(width - 1);
@@ -67,6 +66,7 @@ glFFDWidget::glFFDWidget(QWidget* const parent,
     _resolution(DEFAULT_RESOLUTION)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setAcceptDrops(true);
 	resetMesh();
 }
 
@@ -390,3 +390,15 @@ void glFFDWidget::clearModification() {
 void glFFDWidget::postModified() {
     _modified = true;
 }
+
+
+void glFFDWidget::dragEnterEvent(QDragEnterEvent* event) {
+    emit dragEnter(event);
+}
+
+
+void glFFDWidget::dropEvent(QDropEvent* event) {
+    emit dropped(event, this);
+}
+
+
