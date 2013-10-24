@@ -73,14 +73,19 @@ public:
         return _file_mgr;
     }
 
+
+    void saveProjectAs(const QString& uri);
+    void saveAnimationAs(const QString& uri);
+
+
 public slots:
     void openImages();
     void openProject();
     void saveProject();
     void saveProjectAs();
-    void saveProjectAs(const QString& uri);
     void saveProjectChanges();
     void saveAnimation();
+    void saveAnimationAs();
     void toggleAnimation();
     void clear();
     void about();
@@ -96,6 +101,7 @@ public slots:
 
 protected:
     void closeEvent(QCloseEvent*);
+    bool validAnimation() const;
 
 
 private:
@@ -136,7 +142,9 @@ private:
     QAction* _load_img;
     QAction* _load_prj;
     QAction* _save_prj;
+    QAction* _save_prj_as;
     QAction* _save_anim;
+    QAction* _save_anim_as;
     QAction* _play;
     QAction* _mesh;
 

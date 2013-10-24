@@ -145,7 +145,9 @@ FFDApp::FFDApp():
     _load_img(0),
     _load_prj(0),
     _save_prj(0),
+    _save_prj_as(0),
     _save_anim(0),
+    _save_anim_as(0),
     _play(0),
     _mesh(0),
 
@@ -241,7 +243,11 @@ void FFDApp::setupToolbar() {
     _load_img = new QAction(QIcon(":/open_img"), tr("Open Images"), bar);
     _load_prj = new QAction(QIcon(":/open_prj"), tr("Open Project"), bar);
     _save_prj = new QAction(QIcon(":/save_prj"), tr("Save Project"), bar);
+    _save_prj_as = new QAction(QIcon(":/save_prj_as"),
+                               tr("Save Project As"), bar);
     _save_anim = new QAction(QIcon(":/save_img"), tr("Save Animation"), bar);
+    _save_anim_as = new QAction(QIcon(":/save_img_as"),
+                                tr("Save Animation As"), bar);
     _play_icon = QIcon(":/play");
     _pause_icon = QIcon(":/pause");
     _play = new QAction(_play_icon, tr("Play"), bar);
@@ -250,9 +256,11 @@ void FFDApp::setupToolbar() {
     bar->addAction(_new);
     bar->addAction(_load_prj);
     bar->addAction(_save_prj);
+    bar->addAction(_save_prj_as);
     bar->addSeparator();
     bar->addAction(_load_img);
     bar->addAction(_save_anim);
+    bar->addAction(_save_anim_as);
     bar->addSeparator();
     bar->addAction(_play);
     bar->addAction(_mesh);
@@ -261,7 +269,9 @@ void FFDApp::setupToolbar() {
     connect(_load_img, SIGNAL(triggered()), this, SLOT(openImages()));
     connect(_load_prj, SIGNAL(triggered()), this, SLOT(openProject()));
     connect(_save_prj, SIGNAL(triggered()), this, SLOT(saveProject()));
+    connect(_save_prj_as, SIGNAL(triggered()), this, SLOT(saveProjectAs()));
     connect(_save_anim, SIGNAL(triggered()), this, SLOT(saveAnimation()));
+    connect(_save_anim_as, SIGNAL(triggered()), this, SLOT(saveAnimationAs()));
     connect(_play, SIGNAL(triggered()), this, SLOT(toggleAnimation()));
     connect(_mesh, SIGNAL(triggered()), this, SLOT(toggleMesh()));
 }
@@ -280,9 +290,11 @@ void FFDApp::setupMenus() {
     _file_menu->addAction(_new);
     _file_menu->addAction(_load_prj);
     _file_menu->addAction(_save_prj);
+    _file_menu->addAction(_save_prj_as);
     _file_menu->addSeparator();
     _file_menu->addAction(_load_img);
     _file_menu->addAction(_save_anim);
+    _file_menu->addAction(_save_anim_as);
     _file_menu->addSeparator();
     _file_menu->addAction(_play);
     _file_menu->addAction(_mesh);
@@ -551,13 +563,35 @@ void FFDApp::saveProject() {
 
 
 void FFDApp::saveAnimation() {
-    if(not (_src->hasSelection() and _dst->hasSelection()))
+    if(not validAnimation())
+        return;
+
+    if(_anim_uri.isEmpty())
+        saveAnimationAs();
+    else
+        saveAnimationAs(_anim_uri);
+}
+
+
+bool FFDApp::validAnimation() const {
+    return _src->hasSelection() and _dst->hasSelection();
+}
+
+
+void FFDApp::saveAnimationAs() {
+    if(not validAnimation())
         return;
 
     const QString& uri(QFileDialog::getSaveFileName(
                            this, "Save as:", path(_anim_uri),
                            "Animation (" + selectedAnimMask() + ")"));
 
+    if(not uri.isEmpty())
+        saveAnimationAs(uri);
+}
+
+
+void FFDApp::saveAnimationAs(const QString& uri) {
     const QString& msg("animation to '" + uri + "'");
 
     if(uri.isEmpty())
