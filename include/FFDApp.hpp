@@ -58,7 +58,7 @@ public:
     bool loadProject(const QString& uri);
     bool saveProject(const QString& uri);
 
-    bool loadImage(const QString& uri);
+    bool loadImage(const QString& uri, QWidget* const sender);
     bool saveAnimation(const QString& uri);
 
     inline Blender* mix() const {
@@ -129,8 +129,8 @@ private:
 
     QString selectedAnimMask() const;
 
-    void handleUrls(QDropEvent* event);
-    void process(const QUrl& url);
+    void handleUrls(QDropEvent* event, QWidget* sender);
+    void process(const QUrl& url, QWidget* sender);
     void handleImage(QDropEvent* event);
 
     bool parseProject(QXmlStreamReader& xml);

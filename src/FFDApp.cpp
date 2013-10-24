@@ -146,6 +146,28 @@ bool isProject(const QString& ext);
 QString imageFilters();
 
 
+class SelectionHelper {
+public:
+    inline SelectionHelper(FFDWidget* const widget):
+        _widget(widget)
+    {
+        assert(_widget != 0);
+        _selection = _widget->selection();
+    }
+
+    inline void reset(const bool state) {
+        if(_selection != -1 and state)
+            _widget->select(_selection);
+    }
+
+private:
+    FFDWidget* _widget;
+    int _selection;
+};
+
+
+
+
 /* *****************************************************************************
  * FFDApp implementation.
  * ****************************************************************************/
@@ -259,8 +281,6 @@ void FFDApp::connectDataUI() {
 
     connect(src_wgt, SIGNAL(dropped(QDropEvent*, QWidget*)),
             this, SLOT(dropEvent(QDropEvent*, QWidget*)));
-    connect(bln_wgt, SIGNAL(dropped(QDropEvent*)),
-            this, SLOT(dropEvent(QDropEvent*)));
     connect(dst_wgt, SIGNAL(dropped(QDropEvent*, QWidget*)),
             this, SLOT(dropEvent(QDropEvent*, QWidget*)));
 }
@@ -428,20 +448,9 @@ bool FFDApp::load(const QString& uri,
 {
     std::stringstream in(mesh.toStdString());
 
-    const int src_sel(_src->selection());
-    const int dst_sel(_dst->selection());
-
     const bool loaded_mesh(ffdw->widget()->loadMesh(in));
-    const bool no_image(uri.isEmpty());
-    const bool loaded_image(no_image or mgr()->loadImage(uri));
-
-    if(not no_image and loaded_image) {
-        if(src_sel != -1 and ffdw != _src)
-            _src->select(src_sel);
-
-        if(dst_sel != -1 and ffdw != _dst)
-            _dst->select(dst_sel);
-    }
+    const bool uri_empty(uri.isEmpty());
+    const bool loaded_image(uri_empty or loadImage(uri, ffdw->widget()));
 
     clearModifications();
 
@@ -485,6 +494,7 @@ bool FFDApp::parseProject(QXmlStreamReader& xml) {
         if(xml.readNext()) {
             const QString& tag(xml.name().toString());
             const QString& uri(xml.attributes().value(TAG[URI_TAG]).toString());
+
             if(tag == TAG[SRC_TAG])
                 error = error or not load(uri, xml.readElementText(), _src);
             else if(tag == TAG[DST_TAG])
@@ -520,7 +530,7 @@ void FFDApp::openImages() {
     unsigned files_loaded(0);
     const QStringList::const_iterator& end(files.end());
     for(QStringList::const_iterator i(files.begin()); i != end; ++i)
-        if(not i->isEmpty() and loadImage(*i))
+        if(not i->isEmpty() and loadImage(*i, 0))
             ++files_loaded;
         else
             QMessageBox::warning(this, tr("Load Image"),
@@ -531,9 +541,16 @@ void FFDApp::openImages() {
 }
 
 
-bool FFDApp::loadImage(const QString& uri) {
+bool FFDApp::loadImage(const QString& uri, QWidget* const sender) {
+    SelectionHelper src_sel(_src);
+    SelectionHelper dst_sel(_dst);
+
     if(mgr()->loadImage(uri)) {
         _img_uri = uri;
+
+        src_sel.reset(sender != 0 and sender != _src->widget());
+        dst_sel.reset(sender != 0 and sender != _dst->widget());
+
         return true;
     }
 
@@ -758,16 +775,16 @@ void FFDApp::dropEvent(QDropEvent* event) {
 }
 
 
-void FFDApp::dropEvent(QDropEvent* event, QWidget* /*sender*/) {
+void FFDApp::dropEvent(QDropEvent* event, QWidget* sender) {
     if(event->mimeData()->hasUrls())
-        handleUrls(event);
+        handleUrls(event, sender);
 
     if(event->mimeData()->hasImage())
         handleImage(event);
 }
 
 
-void FFDApp::handleUrls(QDropEvent* event) {
+void FFDApp::handleUrls(QDropEvent* event, QWidget* sender) {
     typedef QList<QUrl> Urls;
     typedef Urls::ConstIterator ConstIterator;
 
@@ -775,11 +792,11 @@ void FFDApp::handleUrls(QDropEvent* event) {
 
     const ConstIterator end(urls.end());
     for(ConstIterator url(urls.begin()); url != end; ++url)
-        process(*url);
+        process(*url, sender);
 }
 
 
-void FFDApp::process(const QUrl& url) {
+void FFDApp::process(const QUrl& url, QWidget* sender) {
     if(url.isLocalFile()) {
         const QString& uri(url.toLocalFile());
         const QFileInfo file(uri);
@@ -788,7 +805,7 @@ void FFDApp::process(const QUrl& url) {
         if(isProject(ext))
             onLoadResult(loadProject(uri), uri);
         else if(isImage(ext))
-            onLoadResult(loadImage(uri), uri);
+            onLoadResult(loadImage(uri, sender), uri);
         else
             statusBar()->showMessage(uri + " is not supported.");
     }

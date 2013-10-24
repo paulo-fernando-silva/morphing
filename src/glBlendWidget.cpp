@@ -38,7 +38,6 @@ glBlendWidget::glBlendWidget(QWidget* parent):
     _dst(0)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setAcceptDrops(true);
 }
 
 
@@ -107,15 +106,5 @@ void glBlendWidget::updateFaces() {
     unsigned w(src()->resolution() - 1);
 
     generateTriangles(w, w, _faces);
-}
-
-
-void glBlendWidget::dragEnterEvent(QDragEnterEvent* event) {
-    emit dragEnter(event);
-}
-
-
-void glBlendWidget::dropEvent(QDropEvent* event) {
-    emit dropped(event);
 }
 

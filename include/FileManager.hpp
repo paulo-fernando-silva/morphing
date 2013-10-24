@@ -98,6 +98,9 @@ public:
 
     bool loadImage(const QString& uri);
 
+
+    bool exists(const QString& uri) const;
+
     inline QGLWidget* ctx() const {
         return _ctx;
     }

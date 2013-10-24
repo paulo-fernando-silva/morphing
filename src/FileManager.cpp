@@ -65,6 +65,9 @@ void FileManager::add(const Resource& resource) {
 
 
 bool FileManager::add(const QPixmap& img, const QString& uri) {
+    if(exists(uri))
+        return true;
+
     if(ctx()->context() != QGLContext::currentContext())
         ctx()->makeCurrent();
 
@@ -78,9 +81,24 @@ bool FileManager::add(const QPixmap& img, const QString& uri) {
 
 
 bool FileManager::loadImage(const QString& uri) {
-    if(not uri.isEmpty())
-        return add(QPixmap(uri), uri);
+    if(uri.isEmpty())
+        return false;
+
+    if(exists(uri))
+        return true;
+
+    return add(QPixmap(uri), uri);
+}
+
+
+bool FileManager::exists(const QString& uri) const {
+    const ConstIterator end(_resources.end());
+
+    for(ConstIterator i(_resources.begin()); i != end; ++i)
+        if(uri == i->uri)
+            return true;
 
     return false;
 }
+
 
