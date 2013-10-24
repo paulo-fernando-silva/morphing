@@ -103,9 +103,6 @@ const QString PRJ_EXT("xml");
 const QString GIF_EXT("gif");
 const QString MPG_EXT("mpg");
 
-const bool DEFAULT_GIF_CHECKED(true);
-const bool DEFAULT_MPG_CHECKED(false);
-
 const QString DEFAULT_DIR("./");
 const QString URL("https://sites.google.com/site/paulofernandosilva");
 const QString LINK("<a href='" + URL + "'>my website</a>");
@@ -151,17 +148,13 @@ FFDApp::FFDApp():
     _play(0),
     _mesh(0),
 
-    _params_ui(0),
+    _opts_ui(0),
     _mesh_lbl(0),
     _mesh_sb(0),
-
-    _anim_opts(0),
     _fps_lbl(0),
     _fps_sb(0),
     _len_lbl(0),
     _len_sb(0),
-    _gif(0),
-    _mpg(0),
     _bidirectional(0)
 {
     setupTimer();
@@ -220,18 +213,19 @@ void FFDApp::initUI() {
 
 
 void FFDApp::layoutUI() {
-    QGridLayout* const central_layout(new QGridLayout);
-    central_layout->setColumnMinimumWidth(0, DEFAULT_IMG_SIZE_PX);
-    central_layout->setColumnMinimumWidth(1, DEFAULT_IMG_SIZE_PX);
-    central_layout->setColumnMinimumWidth(2, DEFAULT_IMG_SIZE_PX);
-    central_layout->setRowMinimumHeight(0, DEFAULT_IMG_SIZE_PX);
+    QGridLayout* const layout(new QGridLayout);
+    layout->setColumnMinimumWidth(0, DEFAULT_IMG_SIZE_PX);
+    layout->setColumnMinimumWidth(1, DEFAULT_IMG_SIZE_PX);
+    layout->setColumnMinimumWidth(2, DEFAULT_IMG_SIZE_PX);
+    layout->setRowMinimumHeight(0, DEFAULT_IMG_SIZE_PX);
 
     unsigned idx(0);
-    central_layout->addWidget(_src, 0, idx++);
-    central_layout->addWidget(_mix, 0, idx++);
-    central_layout->addWidget(_dst, 0, idx++);
-    central_layout->addWidget(setupParamsUI(centralWidget()), 1, 0, 1, idx);
-    centralWidget()->setLayout(central_layout);
+    layout->addWidget(_src, 0, idx++);
+    layout->addWidget(_mix, 0, idx++);
+    layout->addWidget(_dst, 0, idx++);
+    layout->addWidget(setupOptionsUI(centralWidget()), 1, 0, 1, idx);
+
+    centralWidget()->setLayout(layout);
 }
 
 
@@ -621,13 +615,7 @@ bool FFDApp::saveAnimation(const QString& uri) const {
 
 
 QString FFDApp::selectedAnimMask() const {
-    if(_gif->isChecked())
-        return "*." + GIF_EXT;
-
-    if(_mpg->isChecked())
-        return "*." + MPG_EXT;
-
-    const QString mask("*." + GIF_EXT + " *." + MPG_EXT);
+    const QString& mask("*." + GIF_EXT + " *." + MPG_EXT);
     return mask;
 }
 
@@ -655,28 +643,24 @@ void FFDApp::resolutionChanged(int n) {
 }
 
 
-QWidget* FFDApp::setupParamsUI(QWidget* const parent) {
-    _params_ui = new QWidget(parent);
-    _mesh_lbl = new QLabel("Mesh Resolution", _params_ui);
-    _mesh_sb = new QSpinBox(_params_ui);
+QWidget* FFDApp::setupOptionsUI(QWidget* const parent) {
+    _opts_ui = new QGroupBox("Options", parent);
+    _mesh_lbl = new QLabel("Mesh Resolution", _opts_ui);
+    _mesh_sb = new QSpinBox(_opts_ui);
+    _fps_lbl = new QLabel("FPS", _opts_ui);
+    _fps_sb = new QSpinBox(_opts_ui);
+    _len_lbl = new QLabel("Duration (msec)", _opts_ui);
+    _len_sb = new QSpinBox(_opts_ui);
+    _bidirectional = new QCheckBox("Bidirectional Animation", _opts_ui);
 
-    _anim_opts = new QGroupBox("Animation", _params_ui);
-    _fps_lbl = new QLabel("FPS", _params_ui);
-    _fps_sb = new QSpinBox(_params_ui);
-    _len_lbl = new QLabel("Duration (msec)", _params_ui);
-    _len_sb = new QSpinBox(_params_ui);
-    _gif = new QRadioButton(GIF_EXT, _anim_opts);
-    _mpg = new QRadioButton(MPG_EXT, _anim_opts);
-    _bidirectional = new QCheckBox("Bidirectional", _params_ui);
+    initOptionsUI();
+    layoutOptionsUI();
 
-    initParamsUI();
-    layoutParamsUI();
-
-    return _params_ui;
+    return _opts_ui;
 }
 
 
-void FFDApp::initParamsUI() {
+void FFDApp::initOptionsUI() {
     _fps_sb->setRange(MIN_FPS, MAX_FPS);
     _len_sb->setRange(MIN_LEN, MAX_LEN);
     _mesh_sb->setRange(MIN_RES, MAX_RES);
@@ -692,9 +676,6 @@ void FFDApp::initParamsUI() {
 
     _bidirectional->setChecked(_mix->bidirectional());
 
-    _gif->setChecked(DEFAULT_GIF_CHECKED);
-    _mpg->setChecked(DEFAULT_MPG_CHECKED);
-
     connect(_fps_sb, SIGNAL(valueChanged(int)), this, SLOT(fps(int)));
     connect(_len_sb, SIGNAL(valueChanged(int)), _mix, SLOT(duration(int)));
 
@@ -705,30 +686,24 @@ void FFDApp::initParamsUI() {
 }
 
 
-void FFDApp::layoutParamsUI() {
+void FFDApp::layoutOptionsUI() {
     _fps_lbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     _len_lbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     _mesh_lbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    QGridLayout* const anim_grp_layout(new QGridLayout);
-    unsigned anim_type_idx(0);
-    anim_grp_layout->addWidget(_fps_lbl, 0, anim_type_idx++);
-    anim_grp_layout->addWidget(_fps_sb, 0, anim_type_idx++);
-    anim_grp_layout->addWidget(_len_lbl, 0, anim_type_idx++);
-    anim_grp_layout->addWidget(_len_sb, 0, anim_type_idx++);
-    anim_grp_layout->addWidget(_gif, 0, anim_type_idx++);
-    anim_grp_layout->addWidget(_mpg, 0, anim_type_idx++);
-    anim_grp_layout->addWidget(_bidirectional, 0, anim_type_idx++);
-    _anim_opts->setLayout(anim_grp_layout);
-
     QGridLayout* const layout(new QGridLayout);
     unsigned idx(0);
     layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding), 0, idx++);
-    layout->addWidget(_anim_opts, 0, idx++);
     layout->addWidget(_mesh_lbl, 0, idx++);
     layout->addWidget(_mesh_sb, 0, idx++);
+    layout->addWidget(_fps_lbl, 0, idx++);
+    layout->addWidget(_fps_sb, 0, idx++);
+    layout->addWidget(_len_lbl, 0, idx++);
+    layout->addWidget(_len_sb, 0, idx++);
+    layout->addWidget(_bidirectional, 0, idx++);
     layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding), 0, idx++);
-    _params_ui->setLayout(layout);
+
+    _opts_ui->setLayout(layout);
 }
 
 

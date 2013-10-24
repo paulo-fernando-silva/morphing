@@ -118,9 +118,9 @@ private:
     void initUI();
     void layoutUI();
 
-    QWidget* setupParamsUI(QWidget* const parent);
-    void initParamsUI();
-    void layoutParamsUI();
+    QWidget* setupOptionsUI(QWidget* const parent);
+    void initOptionsUI();
+    void layoutOptionsUI();
 
     QString selectedAnimMask() const;
 
@@ -148,21 +148,17 @@ private:
     QAction* _play;
     QAction* _mesh;
 
-    QIcon _play_icon;
-    QIcon _pause_icon;
-
-    QWidget* _params_ui;
+    QGroupBox* _opts_ui;
     QLabel* _mesh_lbl;
     QSpinBox* _mesh_sb;
-
-    QGroupBox* _anim_opts;
     QLabel* _fps_lbl;
     QSpinBox* _fps_sb;
     QLabel* _len_lbl;
     QSpinBox* _len_sb;
-    QRadioButton* _gif;
-    QRadioButton* _mpg;
     QCheckBox* _bidirectional;
+
+    QIcon _play_icon;
+    QIcon _pause_icon;
 
     FileManagerPtr _file_mgr;
 
