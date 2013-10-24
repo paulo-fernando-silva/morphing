@@ -30,7 +30,6 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QGridLayout>
-#include <boost/bind.hpp>
 
 
 const int NO_SELECTION(-1);

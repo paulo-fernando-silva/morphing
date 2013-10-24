@@ -26,7 +26,7 @@
 
 #include <QPixmap>
 #include <QGLWidget>
-#include <boost/filesystem.hpp>
+#include <QFileInfo>
 
 
 FileManager::FileManager(QGLWidget* const ctx):
@@ -38,7 +38,7 @@ FileManager::FileManager(QGLWidget* const ctx):
 
 FileManager::Resource::Resource(const QString& uri, const unsigned glid):
     uri(uri),
-    name(boost::filesystem::basename(uri.toStdString()).c_str()),
+    name(QFileInfo(uri).fileName()),
     glid(glid)
 {}
 

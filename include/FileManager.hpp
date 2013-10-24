@@ -62,6 +62,26 @@ public:
     }
 
 
+    inline Resource& front() {
+        return _resources.front();
+    }
+
+
+    inline Resource& back() {
+        return _resources.back();
+    }
+
+
+    inline const Resource& front() const {
+        return _resources.front();
+    }
+
+
+    inline const Resource& back() const {
+        return _resources.back();
+    }
+
+
     inline Size size() const {
         return _resources.size();
     }

@@ -30,34 +30,32 @@
 #include "glBlendWidget.hpp"
 #include "SignalBlocker.hpp"
 
+#include <QFile>
+#include <QLabel>
 #include <QTimer>
 #include <QAction>
-#include <QFileDialog>
-#include <QStringList>
-#include <QGridLayout>
-#include <QStatusBar>
 #include <QMenuBar>
-#include <QFileInfo>
-#include <QToolBar>
-#include <QFile>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-#include <QMessageBox>
 #include <QSpinBox>
-#include <QLabel>
-#include <QGLContext>
-#include <QSpacerItem>
+#include <QToolBar>
 #include <QCheckBox>
 #include <QGroupBox>
-#include <QRadioButton>
+#include <QFileInfo>
+#include <QGLContext>
+#include <QStatusBar>
+#include <QFileDialog>
+#include <QGridLayout>
 #include <QPushButton>
+#include <QStringList>
+#include <QSpacerItem>
+#include <QMessageBox>
+#include <QRadioButton>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cassert>
-
-#include <boost/bind.hpp>
 
 
 using namespace std;
@@ -108,6 +106,7 @@ const QString MPG_EXT("mpg");
 const bool DEFAULT_GIF_CHECKED(true);
 const bool DEFAULT_MPG_CHECKED(false);
 
+const QString DEFAULT_DIR("./");
 const QString URL("https://sites.google.com/site/paulofernandosilva");
 const QString LINK("<a href='" + URL + "'>my website</a>");
 const QString TITLE("FFDApp Morphing Example");
@@ -123,6 +122,15 @@ const QString ABOUT("<h4>2D Free Form Deformation morphing </h4>"
                     " and save the resulting animation to a file.<br>"
                     "For more random code go to " + LINK + ".<br>Enjoy :)"
                     "</p>");
+
+
+QString path(const QString& uri) {
+    if(uri.isEmpty())
+        return DEFAULT_DIR;
+
+    return QFileInfo(uri).absolutePath();
+}
+
 
 FFDApp::FFDApp():
     _mix(0),
@@ -240,10 +248,12 @@ void FFDApp::setupToolbar() {
     _mesh = new QAction(QIcon(":/mesh"), tr("Mesh On/Off"), bar);
 
     bar->addAction(_new);
-    bar->addAction(_load_img);
     bar->addAction(_load_prj);
     bar->addAction(_save_prj);
+    bar->addSeparator();
+    bar->addAction(_load_img);
     bar->addAction(_save_anim);
+    bar->addSeparator();
     bar->addAction(_play);
     bar->addAction(_mesh);
 
@@ -268,9 +278,10 @@ void FFDApp::setupMenus() {
     connect(_about_qt, SIGNAL(triggered()), this, SLOT(aboutQt()));
 
     _file_menu->addAction(_new);
-    _file_menu->addAction(_load_img);
     _file_menu->addAction(_load_prj);
     _file_menu->addAction(_save_prj);
+    _file_menu->addSeparator();
+    _file_menu->addAction(_load_img);
     _file_menu->addAction(_save_anim);
     _file_menu->addSeparator();
     _file_menu->addAction(_play);
@@ -339,7 +350,7 @@ void write(const Tag tag,
 
 
 bool FFDApp::saveProject(const QString& uri) const {
-    assert(uri.size() != 0);
+    assert(not uri.isEmpty());
     QFile file(uri);
 
     if(!file.open(QIODevice::WriteOnly)) {
@@ -411,7 +422,7 @@ void loadProjectAttributes(QXmlStreamReader& xml, FFDApp* app) {
 
 
 bool FFDApp::loadProject(const QString& uri) {
-    assert(uri.size() != 0);
+    assert(not uri.isEmpty());
     QFile file(uri);
     if(!file.open(QIODevice::ReadOnly)) {
         statusBar()->showMessage("Failed to open '" + uri + "\'");
@@ -472,59 +483,59 @@ void FFDApp::update() {
 
 
 void FFDApp::openImages() {
-    const QStringList& files(
-        QFileDialog::getOpenFileNames(this, "Open:", "./",
-                                      "Image Files (*.png *.jpg *.bmp)"));
+    const QStringList& files(QFileDialog::getOpenFileNames(
+        this, "Open:", path(_img_uri), "Image Files (*.png *.jpg *.bmp)"));
 
     unsigned files_loaded(0);
     const QStringList::const_iterator& end(files.end());
     for(QStringList::const_iterator i(files.begin()); i != end; ++i)
-        if(i->size() != 0 and mgr()->loadImage(*i))
+        if(not i->isEmpty() and mgr()->loadImage(*i))
             ++files_loaded;
         else
             QMessageBox::warning(this, tr("Load Image"),
                                 "Unable to open '" + *i +"'",
                                 QMessageBox::Ok);
 
-    statusBar()->showMessage(
-        QString::number(files_loaded) + QString(" Files Loaded"));
+    if(files_loaded != 0)
+        _img_uri = mgr()->back().uri;
+
+    statusBar()->showMessage(QString::number(files_loaded) + " Files Loaded");
 }
 
 
 void FFDApp::openProject() {
-    const QString& uri(
-        QFileDialog::getOpenFileName(this, "Open:", "./",
-                                     "Files (*." + PRJ_EXT + ")"));
+    const QString& uri(QFileDialog::getOpenFileName(
+        this, "Open:", path(_prj_uri), "Files (*." + PRJ_EXT + ")"));
 
-    if(uri.size() != 0) {
-        clear();
+    if(uri.isEmpty())
+        return;
 
-        if(loadProject(uri))
-           statusBar()->showMessage("Loaded project from '" + uri + "'",
-                                    MSG_DELAY);
-        else
-            statusBar()->showMessage("Failed to load project from '" +
-                                     uri + "'");
-    }
+    clear();
+
+    const QString& msg("project from '" + uri + "'");
+
+    if(loadProject(uri)) {
+        _prj_uri = uri;
+        statusBar()->showMessage("Loaded " + msg, MSG_DELAY);
+    } else
+        statusBar()->showMessage("Failed to load " + msg);
 }
 
 
 void FFDApp::saveProjectAs(const QString& uri) {
-    _prj_uri = uri;
+    const QString msg("project to '" + uri + "'");
 
-    const QString msg("project to '" + _prj_uri + "'");
-
-    if(saveProject(_prj_uri))
+    if(saveProject(uri)) {
+        _prj_uri = uri;
         statusBar()->showMessage("Saved " + msg, MSG_DELAY);
-    else
+    } else
         statusBar()->showMessage("Failed to save " + msg);
 }
 
 
 void FFDApp::saveProjectAs() {
-    const QString& uri(
-                QFileDialog::getSaveFileName(this, "Save as:", "./",
-                                             "Files (*." + PRJ_EXT + ")"));
+    const QString& uri(QFileDialog::getSaveFileName(
+        this, "Save as:", path(_prj_uri), "Files (*." + PRJ_EXT + ")"));
 
     if(not uri.isEmpty())
         saveProjectAs(uri);
@@ -543,19 +554,20 @@ void FFDApp::saveAnimation() {
     if(not (_src->hasSelection() and _dst->hasSelection()))
         return;
 
-    const QString& uri(QFileDialog::getSaveFileName(this, "Save as:", "./",
-                                                    "Animation ("
-                                                    + selectedAnimMask() +
-                                                    ")"));
+    const QString& uri(QFileDialog::getSaveFileName(
+                           this, "Save as:", path(_anim_uri),
+                           "Animation (" + selectedAnimMask() + ")"));
 
     const QString& msg("animation to '" + uri + "'");
 
-    if(uri.size() != 0) {
-        if(saveAnimation(uri))
-           statusBar()->showMessage("Saved " + msg, MSG_DELAY);
-        else
-            statusBar()->showMessage("Failed to save " + msg);
-    }
+    if(uri.isEmpty())
+        return;
+
+    if(saveAnimation(uri)) {
+        _anim_uri = uri;
+       statusBar()->showMessage("Saved " + msg, MSG_DELAY);
+    } else
+        statusBar()->showMessage("Failed to save " + msg);
 }
 
 

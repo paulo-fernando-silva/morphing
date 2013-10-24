@@ -159,6 +159,8 @@ private:
     FileManagerPtr _file_mgr;
 
     QString _prj_uri;
+    QString _img_uri;
+    QString _anim_uri;
 };
 
 

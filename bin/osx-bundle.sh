@@ -41,6 +41,7 @@ mv "$plist.tmp" "$plist"
 echo "#!/bin/bash"                              >  "$script"
 echo "wd=\"\${0%/*}\""                          >> "$script"
 echo "export DYLD_LIBRARY_PATH=\"\$wd/../$fw\"" >> "$script"
+echo "cd \"\${wd}/../../../\""                  >> "$script"
 echo "exe=\"\${wd}/$binary\""                   >> "$script"
 echo "\"\$exe\""                                >> "$script"
 chmod +x $script

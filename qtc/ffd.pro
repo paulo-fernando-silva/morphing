@@ -3,7 +3,8 @@ TEMPLATE = app
 
 # Lets assume that everyone uses (the awesome) pkg-config.
 CONFIG += link_pkgconfig
-PKGCONFIG += Magick++ boost
+PKGCONFIG += Magick++ # save animation
+PKGCONFIG += boost # scoped_array, scoped_ptr and shared_ptr
 
 DESTDIR = $$PWD/../bin
 
@@ -17,9 +18,6 @@ SOURCES = $$PWD/../src/*.cpp $$PWD/../src/cgl/*.cpp
 HEADERS = $$PWD/../include/*.hpp $$PWD/../include/cgl/*.hpp
 INCLUDEPATH += $$PWD/../include
 RESOURCES += resources.qrc
-
-LIBS += -lboost_filesystem-mt \
-	-lboost_system-mt
 
 macx {
 	ICON = Icon.icns

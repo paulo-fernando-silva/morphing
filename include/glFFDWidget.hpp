@@ -31,7 +31,6 @@
 #include <QGLWidget>
 #include <vector>
 #include <iosfwd>
-#include <boost/function.hpp>
 
 
 class glFFDWidget : public QGLWidget {
