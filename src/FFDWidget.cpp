@@ -120,6 +120,7 @@ void FFDWidget::select(const int i) {
     assert(NO_SELECTION <= i and i < files()->count());
 
     files()->setCurrentIndex(i);
+    widget()->uri(selectionURI());
 }
 
 

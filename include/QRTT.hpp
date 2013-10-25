@@ -25,30 +25,21 @@
 #ifndef QRTT_HPP
 #define QRTT_HPP
 
+#include <QSize>
 #include <QImage>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
-class glBlendWidget;
+class QGLWidget;
 class QGLFramebufferObject;
 
 
-/**
- * @brief The QRTT class creates an fbo for rtt using the dimensions
- * of the biggest attached image.
- * The fbo will be attached from QRTT to ~QRTT.
- * During this period the frames can be drawn to the fbo and retrieved using
- * the pair grabPixels() and pixels().
- * NOTE: This class is specific for (coupled to) the the glBlendWidget.
- * For a more generic approach use QGLFramebufferObject directly.
- * @pre at least one, source or destination, widget must have an image selected.
- */
 class QRTT {
 public:
     typedef unsigned char byte;
     typedef boost::scoped_array<byte> BytePtr;
 
-    QRTT(glBlendWidget* const blender);
+    QRTT(QGLWidget* const widget, const QSize& dim);
 
     ~QRTT();
 
@@ -67,14 +58,13 @@ public:
 
 
 private:
-    void createFramebuffer();
     void bind();
     void unbind();
 
 
 private:
     typedef boost::scoped_ptr<QGLFramebufferObject> FBOPtr;
-    glBlendWidget* _blender;
+    QGLWidget* _widget;
     BytePtr _pixels;
     FBOPtr _fbo;
 };

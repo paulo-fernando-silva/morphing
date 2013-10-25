@@ -25,8 +25,14 @@
 #include "glFFDWidget.hpp"
 #include "cgl/glu.hpp"
 #include "SignalBlocker.hpp"
+#include "QRTT.hpp"
 
+#include <QUrl>
+#include <QDrag>
+#include <QMimeData>
 #include <QMouseEvent>
+#include <QApplication>
+
 #include <iostream>
 #include <cmath>
 
@@ -117,7 +123,7 @@ void glFFDWidget::resizeGL(int width, int height) {
 
 
 void glFFDWidget::paintGL() {
-	makeCurrent();
+    selectGLContext();
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -186,7 +192,29 @@ bool glFFDWidget::square(const Mesh& msh) {
 
 
 void glFFDWidget::mousePressEvent(QMouseEvent* event) {
-    select(normalize(event->x(), event->y()));
+    if(event->buttons() & Qt::LeftButton) {
+        _mouse = event->pos();
+        select(normalize(_mouse.x(), _mouse.y()));
+    }
+}
+
+
+void glFFDWidget::mouseMoveEvent(QMouseEvent* event) {
+    if(not (event->buttons() & Qt::LeftButton))
+        return;
+
+    if(hasSelection())
+        moveSelectionTo(event->pos());
+    else if((event->pos() - _mouse).manhattanLength() >=
+              QApplication::startDragDistance())
+        dragEvent();
+}
+
+
+void glFFDWidget::moveSelectionTo(const QPoint& p) {
+    assert(hasSelection());
+    _mesh[selection()] = normalize(p.x(), p.y());
+    postModified();
 }
 
 
@@ -247,14 +275,6 @@ void glFFDWidget::selectAndPropagate(const int i) {
 
     if(old != selection())
         emit selectionChanged(selection());
-}
-
-
-void glFFDWidget::mouseMoveEvent(QMouseEvent* event) {
-    if(hasSelection()) {
-        _mesh[selection()] = normalize(event->x(), event->y());
-        postModified();
-    }
 }
 
 
@@ -399,6 +419,54 @@ void glFFDWidget::dragEnterEvent(QDragEnterEvent* event) {
 
 void glFFDWidget::dropEvent(QDropEvent* event) {
     emit dropped(event, this);
+}
+
+
+QImage glFFDWidget::frame() {
+    if(validTex()) {
+        const bool mesh_state(isDrawingMesh());
+        drawMesh(false);
+
+        selectGLContext();
+
+        const cgl::uvec2& dim(cgl::dimensions(tex()));
+        QRTT rtt(this, QSize(dim.x, dim.y));
+
+        paintGL();
+
+        drawMesh(mesh_state);
+
+        return rtt.toImage();
+    }
+
+    return QImage();
+}
+
+
+void glFFDWidget::dragEvent() {
+    if(not uri().isEmpty() and validTex()) {
+        QList<QUrl> urls;
+        urls.append(QUrl(uri()));
+
+        QMimeData* const mime_data(new QMimeData);
+        mime_data->setUrls(urls);
+
+        QDrag* const drag(new QDrag(this));
+        drag->setMimeData(mime_data);
+        drag->setPixmap(QPixmap::fromImage(frame()));
+        drag->exec();
+    }
+}
+
+
+void glFFDWidget::uri(const QString& new_uri) {
+    _uri = new_uri;
+}
+
+
+void glFFDWidget::selectGLContext() {
+    if(context() != QGLContext::currentContext())
+        makeCurrent();
 }
 
 

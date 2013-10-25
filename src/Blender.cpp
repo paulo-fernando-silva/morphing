@@ -201,7 +201,7 @@ bool Blender::save(const QString& uri) {
         number_of_frames = number_of_frames * 2 - 1;
 
     const unsigned delay(sh.delay());
-    QRTT rtt(widget());
+    QRTT rtt(widget(), widget()->maxImgDim());
     const unsigned w(rtt.width()), h(rtt.height());
     Animation animation;
     animation.reserve(number_of_frames);

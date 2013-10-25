@@ -31,11 +31,17 @@
 #include <cassert>
 
 
-QRTT::QRTT(glBlendWidget* const blender):
-    _blender(blender)
+QRTT::QRTT(QGLWidget* const widget, const QSize& dim):
+    _widget(widget)
 {
-    assert(blender != 0);
-    createFramebuffer();
+    assert(_widget != 0);
+
+    if(_widget->context() != QGLContext::currentContext())
+        _widget->makeCurrent();
+
+    _fbo.reset(new QGLFramebufferObject(dim.width(), dim.height()));
+    _pixels.reset(new byte[dim.width() * dim.height() * 4]);
+
     bind();
 }
 
@@ -55,28 +61,6 @@ unsigned QRTT::height() const {
 }
 
 
-void QRTT::createFramebuffer() {
-    const GLint src(_blender->src()->tex());
-    const GLint dst(_blender->dst()->tex());
-    assert(src != 0 or dst != 0);
-
-    _blender->makeCurrent();
-    cgl::uvec2 src_dim, dst_dim;
-
-    if(src != 0)
-        src_dim = cgl::dimensions(src);
-
-    if(dst != 0)
-        dst_dim = cgl::dimensions(dst);
-
-    const cgl::uvec2& dim(cgl::max(src_dim, dst_dim));
-    assert(cgl::area(dim) != 0);
-
-    _fbo.reset(new QGLFramebufferObject(dim.x, dim.y));
-    _pixels.reset(new byte[width() * height() * 4]);
-}
-
-
 void QRTT::bind() {
     assert(_fbo->bind());
     cgl::view2D(cgl::uvec2(), uvec2(width(), height()));
@@ -85,7 +69,7 @@ void QRTT::bind() {
 
 void QRTT::unbind() {
     assert(_fbo->release());
-    const uvec2 dim(_blender->width(), _blender->height());
+    const uvec2 dim(_widget->width(), _widget->height());
     cgl::view2D(cgl::uvec2(), dim);
 }
 

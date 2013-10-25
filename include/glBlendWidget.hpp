@@ -26,9 +26,11 @@
 #define GLBLENDWIDGET_HPP
 
 #include "utils.hpp"
-#include <QGLWidget>
+
+#include <QSize>
 #include <QPoint>
 #include <QImage>
+#include <QGLWidget>
 
 
 class glFFDWidget;
@@ -71,11 +73,12 @@ public:
     /**
      * @brief frame a SLOW but simple way of capturing the current frame
      * @return a QImage representing the widget's contents.
-     * @pre #canPaint
      */
     QImage frame();
 
     bool canPaint() const;
+
+    QSize maxImgDim();
 
 
 signals:

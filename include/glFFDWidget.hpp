@@ -28,7 +28,10 @@
 
 #include "cgl/vec.hpp"
 
+#include <QPoint>
+#include <QString>
 #include <QGLWidget>
+
 #include <vector>
 #include <iosfwd>
 
@@ -81,7 +84,6 @@ public:
     vec2 normalize(const int x, const int y);
 
 
-
     void selectAndPropagate(const int i);
 
     void select(const vec2& p);
@@ -108,6 +110,12 @@ public:
     }
 
 
+    void uri(const QString& new_uri);
+    inline const QString& uri() const {
+        return _uri;
+    }
+
+
     bool saveMesh(std::ostream& out);
     bool loadMesh(std::istream& in);
 
@@ -116,6 +124,13 @@ public:
     inline bool modified() const {
         return _modified;
     }
+
+
+    /**
+     * @brief frame a SLOW but simple way of capturing the current frame
+     * @return a QImage representing the widget's contents.
+     */
+    QImage frame();
 
 
 signals:
@@ -144,6 +159,10 @@ protected:
     void dragEnterEvent(QDragEnterEvent* event);
     void dropEvent(QDropEvent* event);
 
+    void moveSelectionTo(const QPoint& p);
+
+    void dragEvent();
+
 
 private:
     void draw() const;
@@ -161,6 +180,8 @@ private:
     void warnChanges();
     void postModified();
 
+    void selectGLContext();
+
 
 private:
     GLuint _tex;
@@ -170,6 +191,8 @@ private:
     unsigned _resolution;
     Mesh _mesh;
     Indices _indices;
+    QPoint _mouse;
+    QString _uri;
 };
 
 
