@@ -133,7 +133,7 @@ private:
     void process(const QUrl& url, QWidget* sender);
     void handleImage(QDropEvent* event);
 
-    bool parseProject(QXmlStreamReader& xml);
+    bool parseProject(QXmlStreamReader& xml, const QString& prj_uri);
 
     void onLoadResult(const bool success, const QString& uri);
     void onSaveResult(const bool success, const QString& uri);

@@ -30,6 +30,7 @@
 #include "glBlendWidget.hpp"
 #include "SignalBlocker.hpp"
 
+#include <QDir>
 #include <QUrl>
 #include <QFile>
 #include <QLabel>
@@ -135,6 +136,7 @@ QString path(const QString& uri);
 
 void write(const Tag tag,
            const FFDWidget* const w,
+           const QDir& prj_dir,
            QXmlStreamWriter& xml);
 
 void loadProjectAttributes(QXmlStreamReader& xml, FFDApp* app);
@@ -419,7 +421,7 @@ bool FFDApp::saveProject(const QString& uri) {
     assert(not uri.isEmpty());
 
     _prj_uri = uri;
-
+    const QDir& dir(QFileInfo(uri).dir());
     QFile file(uri);
 
     if(!file.open(QIODevice::WriteOnly)) {
@@ -433,8 +435,8 @@ bool FFDApp::saveProject(const QString& uri) {
         xml.writeStartElement(TAG[PROJECT_TAG]);
             xml.writeAttribute(TAG[FPS_TAG], QString::number(_mix->fps()));
             xml.writeAttribute(TAG[LEN_TAG], QString::number(_mix->duration()));
-            write(SRC_TAG, _src, xml);
-            write(DST_TAG, _dst, xml);
+            write(SRC_TAG, _src, dir, xml);
+            write(DST_TAG, _dst, dir, xml);
         xml.writeEndElement();
     xml.writeEndDocument();
 
@@ -476,7 +478,7 @@ bool FFDApp::loadProject(const QString& uri) {
     clear();
     _prj_uri = uri;
 
-    if(parseProject(xml))
+    if(parseProject(xml, uri))
         return true;
 
     clear();
@@ -485,15 +487,19 @@ bool FFDApp::loadProject(const QString& uri) {
 }
 
 
-bool FFDApp::parseProject(QXmlStreamReader& xml) {
+bool FFDApp::parseProject(QXmlStreamReader& xml, const QString& prj_uri) {
     bool error(false);
+    const QDir& prj_dir(QFileInfo(prj_uri).dir());
 
     xml.readNextStartElement(); // PROJECT
     loadProjectAttributes(xml, this);
     while(!xml.atEnd())
         if(xml.readNext()) {
             const QString& tag(xml.name().toString());
-            const QString& uri(xml.attributes().value(TAG[URI_TAG]).toString());
+            QString uri(xml.attributes().value(TAG[URI_TAG]).toString());
+
+            if(QFileInfo(uri).isRelative())
+                uri = prj_dir.filePath(uri);
 
             if(tag == TAG[SRC_TAG])
                 error = error or not load(uri, xml.readElementText(), _src);
@@ -859,12 +865,15 @@ QString path(const QString& uri) {
 
 void write(const Tag tag,
            const FFDWidget* const w,
+           const QDir& prj_dir,
            QXmlStreamWriter& xml)
 {
     assert(w != 0);
 
+    const QString& uri(prj_dir.relativeFilePath(w->selectionURI()));
+
     xml.writeStartElement(TAG[tag]);
-        xml.writeAttribute(TAG[URI_TAG], w->selectionURI());
+        xml.writeAttribute(TAG[URI_TAG], uri);
         std::stringstream out;
         w->widget()->saveMesh(out);
         xml.writeCharacters(QString(out.str().c_str()));
