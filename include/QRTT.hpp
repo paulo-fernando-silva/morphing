@@ -25,6 +25,7 @@
 #ifndef QRTT_HPP
 #define QRTT_HPP
 
+#include <QImage>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -37,7 +38,9 @@ class QGLFramebufferObject;
  * of the biggest attached image.
  * The fbo will be attached from QRTT to ~QRTT.
  * During this period the frames can be drawn to the fbo and retrieved using
- * the pair grabFrame() and pixels().
+ * the pair grabPixels() and pixels().
+ * NOTE: This class is specific for (coupled to) the the glBlendWidget.
+ * For a more generic approach use QGLFramebufferObject directly.
  * @pre at least one, source or destination, widget must have an image selected.
  */
 class QRTT {
@@ -49,7 +52,7 @@ public:
 
     ~QRTT();
 
-    void grabFrame();
+    void grabPixels();
 
     inline const BytePtr& pixels() const {
         return _pixels;
@@ -58,6 +61,9 @@ public:
     unsigned width() const;
 
     unsigned height() const;
+
+
+    QImage toImage() const;
 
 
 private:

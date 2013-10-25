@@ -90,10 +90,17 @@ void QRTT::unbind() {
 }
 
 
-void QRTT::grabFrame() {
+void QRTT::grabPixels() {
     glReadPixels(0, 0,  width(), height(), GL_RGBA,
                  GL_UNSIGNED_BYTE, _pixels.get());
 }
+
+
+QImage QRTT::toImage() const {
+    return _fbo->toImage();
+}
+
+
 
 
 

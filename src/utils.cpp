@@ -119,18 +119,23 @@ void drawBlended(const Mesh& src_mesh,
     Mesh mesh;
     interpolate(src_mesh, dst_mesh, t, mesh);
 
-    glDisable(GL_BLEND);
-    draw(src_tex, mesh, src_mesh, faces);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
-
-    if(not glBlendAlphaEquals(t)) {
-        glBlendColor(0.0f, 0.0f, 0.0f, t);
-        assert(glBlendAlphaEquals(t));
+    if(src_tex != 0) {
+        glDisable(GL_BLEND);
+        draw(src_tex, mesh, src_mesh, faces);
     }
 
-    draw(dst_tex, mesh, dst_mesh, faces);
+    if(dst_tex != 0 and glBlendColor != 0) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
+
+        if(not glBlendAlphaEquals(t)) {
+            glBlendColor(0.0f, 0.0f, 0.0f, t);
+            assert(glBlendAlphaEquals(t));
+        }
+
+        draw(dst_tex, mesh, dst_mesh, faces);
+    }
+
     glDisable(GL_BLEND);
 }
 

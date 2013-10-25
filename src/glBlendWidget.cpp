@@ -25,6 +25,14 @@
 #include "cgl/glu.hpp"
 #include "glBlendWidget.hpp"
 #include "glFFDWidget.hpp"
+#include "QRTT.hpp"
+
+#include <QDrag>
+#include <QPixmap>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QApplication>
+
 #include <algorithm>
 
 
@@ -70,16 +78,17 @@ void glBlendWidget::blendFactor(float t) {
 }
 
 
+bool glBlendWidget::canPaint() const {
+    return src() != 0 and dst() != 0 and
+            (src()->tex() != 0 or dst()->tex() != 0);
+}
+
 void glBlendWidget::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if( src() == 0 or dst() == 0 or
-        src()->tex() == 0 or dst()->tex() == 0 or
-        glBlendColor == 0)
-        return;
-
-    drawBlended(src()->mesh(), dst()->mesh(), faces(),
-                src()->tex(), dst()->tex(), blendFactor());
+    if(canPaint())
+        drawBlended(src()->mesh(), dst()->mesh(), faces(),
+                    src()->tex(), dst()->tex(), blendFactor());
 }
 
 
@@ -108,3 +117,41 @@ void glBlendWidget::updateFaces() {
     generateTriangles(w, w, _faces);
 }
 
+
+QImage glBlendWidget::frame() {
+    QRTT rtt(this);
+    paintGL();
+    return rtt.toImage();
+}
+
+
+void glBlendWidget::mousePressEvent(QMouseEvent* event) {
+    if(event->button() == Qt::LeftButton)
+        _mouse_press_pos = event->pos();
+}
+
+
+void glBlendWidget::mouseMoveEvent(QMouseEvent* event) {
+    if(not (event->buttons() & Qt::LeftButton))
+        return;
+
+    if((event->pos() - _mouse_press_pos).manhattanLength() >=
+        QApplication::startDragDistance())
+        dragEvent();
+}
+
+
+void glBlendWidget::dragEvent() {
+    if(canPaint()) {
+        // must be able to paint the frame
+        const QImage& img(frame());
+
+        QMimeData* const mime_data(new QMimeData);
+        mime_data->setImageData(QVariant(img));
+
+        QDrag* const drag(new QDrag(this));
+        drag->setMimeData(mime_data);
+        drag->setPixmap(QPixmap::fromImage(img));
+        drag->exec();
+    }
+}

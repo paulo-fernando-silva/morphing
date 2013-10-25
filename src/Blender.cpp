@@ -208,7 +208,7 @@ bool Blender::save(const QString& uri) {
 
     for(unsigned i(0); i != number_of_frames; ++i) {
         widget()->paintGL();
-        rtt.grabFrame();
+        rtt.grabPixels();
 
         if(not animation.addFrame(w, h, rtt.pixels().get(), delay))
             return false;

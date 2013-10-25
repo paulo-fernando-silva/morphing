@@ -131,7 +131,7 @@ private:
 
     void handleUrls(QDropEvent* event, QWidget* sender);
     void process(const QUrl& url, QWidget* sender);
-    void handleImage(QDropEvent* event);
+    void handleImage(QDropEvent* event, QWidget* sender);
 
     bool parseProject(QXmlStreamReader& xml, const QString& prj_uri);
 
@@ -141,6 +141,7 @@ private:
                   const QString& action,
                   const QString& uri);
 
+    QString genImgURI();
 
 
 private:
@@ -148,7 +149,7 @@ private:
     FFDWidget* _src;
     FFDWidget* _dst;
 
-    QTimer* _frame;
+    QTimer* _timer;
 
     QMenu* _file_menu;
     QMenu* _help_menu;
@@ -184,6 +185,7 @@ private:
     QString _img_uri;
     QString _anim_uri;
     QString _img_filters;
+    unsigned _curr_img_id;
 };
 
 

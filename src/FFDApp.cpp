@@ -112,6 +112,8 @@ const QString SAVE_ACT("save");
 const QString LOAD_ACT("load");
 
 const QString DEFAULT_DIR("./");
+const QString DEFAULT_IMAGE_NAME("image");
+const QString DEFAULT_IMAGE_DOT_EXT(".png");
 const QString URL("https://sites.google.com/site/paulofernandosilva");
 const QString LINK("<a href='" + URL + "'>my website</a>");
 const QString TITLE("FFDApp Morphing Example");
@@ -177,7 +179,7 @@ FFDApp::FFDApp():
     _mix(0),
     _src(0),
     _dst(0),
-    _frame(0),
+    _timer(0),
     _file_menu(0),
     _help_menu(0),
     _about(0),
@@ -200,7 +202,8 @@ FFDApp::FFDApp():
     _len_lbl(0),
     _len_sb(0),
     _bidirectional(0),
-    _img_filters(imageFilters())
+    _img_filters(imageFilters()),
+    _curr_img_id(0)
 {
     setupTimer();
     setupToolbar();
@@ -378,8 +381,8 @@ void FFDApp::setupMenus() {
 
 
 void FFDApp::setupTimer() {
-    _frame = new QTimer(this);
-    connect(_frame, SIGNAL(timeout()), this, SLOT(update()));
+    _timer = new QTimer(this);
+    connect(_timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 
@@ -392,9 +395,9 @@ void FFDApp::fps(int n) {
     _mix->fps(n);
 
     if(n == 0)
-        _frame->stop();
+        _timer->stop();
     else
-        _frame->start(1000.0f / n);
+        _timer->start(1000.0f / n);
 
     if(_fps_sb->value() != int(_mix->fps())) {
         const SignalBlocker block(_fps_sb);
@@ -771,7 +774,7 @@ void FFDApp::closeEvent(QCloseEvent*) {
 
 void FFDApp::dragEnterEvent(QDragEnterEvent* event) {
     // Not allowing raw data, unless I save it somehow in the project file.
-    if(event->mimeData()->hasUrls()/* or event->mimeData()->hasImage()*/)
+    if(event->mimeData()->hasUrls() or event->mimeData()->hasImage())
         event->acceptProposedAction();
 }
 
@@ -786,7 +789,7 @@ void FFDApp::dropEvent(QDropEvent* event, QWidget* sender) {
         handleUrls(event, sender);
 
     if(event->mimeData()->hasImage())
-        handleImage(event);
+        handleImage(event, sender);
 }
 
 
@@ -818,14 +821,15 @@ void FFDApp::process(const QUrl& url, QWidget* sender) {
 }
 
 
-void FFDApp::handleImage(QDropEvent* event) {
+void FFDApp::handleImage(QDropEvent* event, QWidget* sender) {
     assert(event and event->mimeData()->hasImage());
 
-    const QString uri;
-    const QImage& image(qvariant_cast<QImage>(event->mimeData()->imageData()));
-    const bool loaded(mgr()->add(QPixmap::fromImage(image), uri));
+    const QString& uri(genImgURI());
 
-    onLoadResult(loaded, uri);
+    const QImage& image(qvariant_cast<QImage>(event->mimeData()->imageData()));
+    image.save(uri);
+
+    onLoadResult(loadImage(uri, sender), uri);
 }
 
 
@@ -849,6 +853,23 @@ void FFDApp::onLoadResult(const bool success, const QString& uri) {
 
 void FFDApp::onSaveResult(const bool success, const QString& uri) {
     onResult(success, SAVE_ACT, uri);
+}
+
+
+QString FFDApp::genImgURI() {
+    const QDir dir(path(_prj_uri));
+
+    QFileInfo info;
+    QString uri;
+
+    do {
+        uri = dir.filePath(DEFAULT_IMAGE_NAME +
+                           QString::number(_curr_img_id++) +
+                           DEFAULT_IMAGE_DOT_EXT);
+        info.setFile(uri);
+    } while(info.exists());
+
+    return uri;
 }
 
 
