@@ -117,18 +117,21 @@ const QString DEFAULT_IMAGE_DOT_EXT(".png");
 const QString URL("https://sites.google.com/site/paulofernandosilva");
 const QString LINK("<a href='" + URL + "'>my website</a>");
 const QString TITLE("FFDApp Morphing Example");
-const QString ABOUT("<h4>2D Free Form Deformation morphing </h4>"
-                    "<p style=\"font:12px;\">"
-                    "Use the File menu to load images or a project file. "
-                    "Select one image as source and another as destination,"
-                    " each using the respective combo box. "
-                    "Move the points on the control meshes"
-                    " until you have reached the desired effect. "
-                    "Click animate for a continous animation. "
-                    "Set the animation time and frames per second"
-                    " and save the resulting animation to a file.<br>"
-                    "For more random code go to " + LINK + ".<br>Enjoy :)"
-                    "</p>");
+const QString ABOUT_BEGIN(
+        "<h4>2D Free Form Deformation morphing </h4>"
+        "<p style=\"font:12px;\">"
+        "Use the File menu to load images or a project file. "
+        "Select one image as source and another as destination,"
+        " each using the respective combo box. "
+        "Move the points on the control meshes"
+        " until you have reached the desired effect. "
+        "Click animate for a continous animation. "
+        "Set the animation time and frames per second"
+        " and save the resulting animation to a file.<br>"
+        "You can drag and drop project files and images directly to the app,"
+        " and from the app to other applications.<br>"
+        "For more random code go to " + LINK + ".<br>Enjoy :)");
+const QString ABOUT_END("</p>");
 
 
 /* *****************************************************************************
@@ -189,6 +192,8 @@ FFDApp::FFDApp():
     _load_prj(0),
     _save_prj(0),
     _save_prj_as(0),
+    _save_img(0),
+    _save_img_as(0),
     _save_anim(0),
     _save_anim_as(0),
     _play(0),
@@ -318,8 +323,11 @@ void FFDApp::setupToolbar() {
     _save_prj = new QAction(QIcon(":/save_prj"), tr("Save Project"), bar);
     _save_prj_as = new QAction(QIcon(":/save_prj_as"),
                                tr("Save Project As"), bar);
-    _save_anim = new QAction(QIcon(":/save_img"), tr("Save Animation"), bar);
-    _save_anim_as = new QAction(QIcon(":/save_img_as"),
+    _save_img = new QAction(QIcon(":/save_img"), tr("Save Image"), bar);
+    _save_img_as = new QAction(QIcon(":/save_img_as"),
+                                tr("Save Image As"), bar);
+    _save_anim = new QAction(QIcon(":/save_anim"), tr("Save Animation"), bar);
+    _save_anim_as = new QAction(QIcon(":/save_anim_as"),
                                 tr("Save Animation As"), bar);
     _play_icon = QIcon(":/play");
     _pause_icon = QIcon(":/pause");
@@ -332,6 +340,8 @@ void FFDApp::setupToolbar() {
     bar->addAction(_save_prj_as);
     bar->addSeparator();
     bar->addAction(_load_img);
+    bar->addAction(_save_img);
+    bar->addAction(_save_img_as);
     bar->addAction(_save_anim);
     bar->addAction(_save_anim_as);
     bar->addSeparator();
@@ -343,6 +353,8 @@ void FFDApp::setupToolbar() {
     connect(_load_prj, SIGNAL(triggered()), this, SLOT(openProject()));
     connect(_save_prj, SIGNAL(triggered()), this, SLOT(saveProject()));
     connect(_save_prj_as, SIGNAL(triggered()), this, SLOT(saveProjectAs()));
+    connect(_save_img, SIGNAL(triggered()), this, SLOT(saveImage()));
+    connect(_save_img_as, SIGNAL(triggered()), this, SLOT(saveImageAs()));
     connect(_save_anim, SIGNAL(triggered()), this, SLOT(saveAnimation()));
     connect(_save_anim_as, SIGNAL(triggered()), this, SLOT(saveAnimationAs()));
     connect(_play, SIGNAL(triggered()), this, SLOT(toggleAnimation()));
@@ -366,6 +378,8 @@ void FFDApp::setupMenus() {
     _file_menu->addAction(_save_prj_as);
     _file_menu->addSeparator();
     _file_menu->addAction(_load_img);
+    _file_menu->addAction(_save_img);
+    _file_menu->addAction(_save_img_as);
     _file_menu->addAction(_save_anim);
     _file_menu->addAction(_save_anim_as);
     _file_menu->addSeparator();
@@ -534,7 +548,11 @@ void FFDApp::update() {
 
 void FFDApp::openImages() {
     const QStringList& files(QFileDialog::getOpenFileNames(
-        this, "Open:", path(_img_uri), "Image Files (" + _img_filters + ")"));
+                                 this, "Open:", path(_load_img_uri),
+                                 "Image Files (" + _img_filters + ")"));
+
+    if(files.isEmpty())
+        return;
 
     unsigned files_loaded(0);
     const QStringList::const_iterator& end(files.end());
@@ -555,7 +573,7 @@ bool FFDApp::loadImage(const QString& uri, QWidget* const sender) {
     SelectionHelper dst_sel(_dst);
 
     if(mgr()->loadImage(uri)) {
-        _img_uri = uri;
+        _load_img_uri = uri;
 
         src_sel.reset(sender != 0 and sender != _src->widget());
         dst_sel.reset(sender != 0 and sender != _dst->widget());
@@ -593,6 +611,30 @@ void FFDApp::saveProject() {
 }
 
 
+void FFDApp::saveImage() {
+    if(not validAnimation())
+        return;
+
+    if(_save_img_uri.isEmpty())
+        saveImageAs();
+    else
+        onSaveResult(saveImage(_save_img_uri), _save_img_uri);
+}
+
+
+void FFDApp::saveImageAs() {
+    if(not validAnimation())
+        return;
+
+    const QString& uri(QFileDialog::getSaveFileName(
+                           this, "Save as:", path(_save_img_uri),
+                           "Image (" + _img_filters + ")"));
+
+    if(not uri.isEmpty())
+        onSaveResult(saveImage(uri), uri);
+}
+
+
 void FFDApp::saveAnimation() {
     if(not validAnimation())
         return;
@@ -604,31 +646,46 @@ void FFDApp::saveAnimation() {
 }
 
 
-bool FFDApp::validAnimation() const {
-    return _src->hasSelection() and _dst->hasSelection();
-}
-
-
 void FFDApp::saveAnimationAs() {
     if(not validAnimation())
         return;
 
     const QString& uri(QFileDialog::getSaveFileName(
                            this, "Save as:", path(_anim_uri),
-                           "Animation (" + selectedAnimMask() + ")"));
+                           "Animation (" + animMask() + ")"));
 
     if(not uri.isEmpty())
         onSaveResult(saveAnimation(uri), uri);
 }
 
 
+bool FFDApp::validAnimation() const {
+    return _src->hasSelection() and _dst->hasSelection();
+}
+
+
 void FFDApp::about() {
-    QMessageBox::about(this, tr("About"), ABOUT);
+    QMessageBox::about(this, tr("About"), ABOUT_BEGIN +
+                       "<br><br>Supported image types: " + _img_filters +
+                       "<br><br>Supported animation types: " + animMask() +
+                       ABOUT_END);
 }
 
 
 void FFDApp::aboutQt() {
     QMessageBox::aboutQt(this, tr("About Qt"));
+}
+
+
+bool FFDApp::saveImage(const QString& uri) {
+    assert(_mix->widget()->canPaint());
+
+    if(_mix->widget()->frame().save(uri)) {
+        _save_img_uri = uri;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -642,7 +699,7 @@ bool FFDApp::saveAnimation(const QString& uri) {
 }
 
 
-QString FFDApp::selectedAnimMask() const {
+QString FFDApp::animMask() const {
     const QString& mask("*." + GIF_EXT + " *." + MPG_EXT);
     return mask;
 }

@@ -33,16 +33,15 @@ else
     echo "$src not found. Edit this script and change the directory to match where you have the ImageMagick coders installed."
 fi
 
-script_name="$binary.sh"
+script_name="$binary"
+bin="$binary.app"
 script="$contents/MacOS/$script_name"
-plist="$contents/Info.plist"
-sed "s/>$binary</>$script_name</" "$plist" > "$plist.tmp"
-mv "$plist.tmp" "$plist"
+mv $script "$contents/MacOS/$bin"
 echo "#!/bin/bash"                              >  "$script"
 echo "wd=\"\${0%/*}\""                          >> "$script"
 echo "export DYLD_LIBRARY_PATH=\"\$wd/../$fw\"" >> "$script"
 echo "cd \"\${wd}/../../../\""                  >> "$script"
-echo "exe=\"\${wd}/$binary\""                   >> "$script"
+echo "exe=\"\${wd}/$bin\""                      >> "$script"
 echo "\"\$exe\""                                >> "$script"
 chmod +x $script
 echo "Done"

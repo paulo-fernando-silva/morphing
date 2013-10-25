@@ -73,6 +73,7 @@ public:
     /**
      * @brief frame a SLOW but simple way of capturing the current frame
      * @return a QImage representing the widget's contents.
+     * @pre #canPaint
      */
     QImage frame();
 

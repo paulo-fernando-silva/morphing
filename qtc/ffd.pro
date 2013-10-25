@@ -9,9 +9,9 @@ PKGCONFIG += boost # scoped_array, scoped_ptr and shared_ptr
 DESTDIR = $$PWD/../bin
 
 CONFIG(release, debug|release) {
-	TARGET = ffd
+	TARGET = Morphing
 } else {
-	TARGET = ffd_d
+	TARGET = Morphing_d
 }
 
 SOURCES = $$PWD/../src/*.cpp $$PWD/../src/cgl/*.cpp

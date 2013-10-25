@@ -59,6 +59,7 @@ public:
     bool saveProject(const QString& uri);
 
     bool loadImage(const QString& uri, QWidget* const sender);
+    bool saveImage(const QString& uri);
     bool saveAnimation(const QString& uri);
 
     inline Blender* mix() const {
@@ -84,6 +85,8 @@ public slots:
     void saveProject();
     void saveProjectAs();
     void saveProjectChanges();
+    void saveImage();
+    void saveImageAs();
     void saveAnimation();
     void saveAnimationAs();
     void toggleAnimation();
@@ -127,7 +130,7 @@ private:
     void initOptionsUI();
     void layoutOptionsUI();
 
-    QString selectedAnimMask() const;
+    QString animMask() const;
 
     void handleUrls(QDropEvent* event, QWidget* sender);
     void process(const QUrl& url, QWidget* sender);
@@ -162,6 +165,8 @@ private:
     QAction* _load_prj;
     QAction* _save_prj;
     QAction* _save_prj_as;
+    QAction* _save_img;
+    QAction* _save_img_as;
     QAction* _save_anim;
     QAction* _save_anim_as;
     QAction* _play;
@@ -182,7 +187,8 @@ private:
     FileManagerPtr _file_mgr;
 
     QString _prj_uri;
-    QString _img_uri;
+    QString _load_img_uri;
+    QString _save_img_uri;
     QString _anim_uri;
     QString _img_filters;
     unsigned _curr_img_id;
