@@ -90,6 +90,8 @@ public slots:
     void saveAnimation();
     void saveAnimationAs();
     void toggleAnimation();
+    void playAnimation();
+    void pauseAnimation();
     void clear();
     void about();
     void aboutQt();

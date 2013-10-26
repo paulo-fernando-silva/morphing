@@ -33,6 +33,10 @@ else
     echo "$src not found. Edit this script and change the directory to match where you have the ImageMagick coders installed."
 fi
 
+if [ ! -f "$libdir/libclparser.dylib" ]; then 
+    cp /System/Library/Frameworks/OpenCL.framework/Versions/A/Libraries/libclparser.dylib "$libdir"
+fi
+
 script_name="$binary"
 bin="$binary.app"
 script="$contents/MacOS/$script_name"

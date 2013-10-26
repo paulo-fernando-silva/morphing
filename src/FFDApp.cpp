@@ -198,7 +198,6 @@ FFDApp::FFDApp():
     _save_anim_as(0),
     _play(0),
     _mesh(0),
-
     _opts_ui(0),
     _mesh_lbl(0),
     _mesh_sb(0),
@@ -229,6 +228,7 @@ FFDApp::~FFDApp() {
 
 
 void FFDApp::clear() {
+    pauseAnimation();
     _src->clear();
     _dst->clear();
     _mix->clear();
@@ -529,13 +529,22 @@ bool FFDApp::parseProject(QXmlStreamReader& xml, const QString& prj_uri) {
 
 
 void FFDApp::toggleAnimation() {
-    if(_mix->animated()) {
-        _mix->animated(false);
-        _play->setIcon(_play_icon);
-    } else {
-        _mix->animated(true);
-        _play->setIcon(_pause_icon);
-    }
+    if(_mix->animated())
+        pauseAnimation();
+    else
+        playAnimation();
+}
+
+
+void FFDApp::playAnimation() {
+    _mix->animated(true);
+    _play->setIcon(_pause_icon);
+}
+
+
+void FFDApp::pauseAnimation() {
+    _mix->animated(false);
+    _play->setIcon(_play_icon);
 }
 
 
