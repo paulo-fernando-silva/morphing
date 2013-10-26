@@ -139,7 +139,10 @@ void Blender::bidirectional(const bool state) {
 
 
 void Blender::animated(const bool state) {
-    _animated = state;
+    if(_animated != state) {
+        _animated = state;
+        emit animStateChanged();
+    }
 }
 
 

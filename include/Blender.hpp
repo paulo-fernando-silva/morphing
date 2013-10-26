@@ -94,6 +94,10 @@ public:
     bool save(const QString& uri);
 
 
+signals:
+    void animStateChanged();
+
+
 public slots:
     void percent(int p);
     void blendFactorChanged(float t);

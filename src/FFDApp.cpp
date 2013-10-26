@@ -228,7 +228,6 @@ FFDApp::~FFDApp() {
 
 
 void FFDApp::clear() {
-    pauseAnimation();
     _src->clear();
     _dst->clear();
     _mix->clear();
@@ -268,6 +267,8 @@ void FFDApp::connectDataUI() {
     glBlendWidget* const bln_wgt(_mix->widget());
     glFFDWidget* const src_wgt(_src->widget());
     glFFDWidget* const dst_wgt(_dst->widget());
+
+    connect(_mix, SIGNAL(animStateChanged()), this, SLOT(syncAnimState()));
 
     connect(src_wgt, SIGNAL(selectionChanged(int)), dst_wgt, SLOT(select(int)));
     connect(dst_wgt, SIGNAL(selectionChanged(int)), src_wgt, SLOT(select(int)));
@@ -936,6 +937,14 @@ QString FFDApp::genImgURI() {
     } while(info.exists());
 
     return uri;
+}
+
+
+void FFDApp::syncAnimState() {
+    if(_mix->animated())
+        playAnimation();
+    else
+        pauseAnimation();
 }
 
 

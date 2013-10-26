@@ -102,6 +102,7 @@ public slots:
     void toggleMesh();
     void bidirectionality();
     void clearModifications();
+    void syncAnimState();
 
     void dragEnterEvent(QDragEnterEvent* event);
     void dropEvent(QDropEvent* event);
