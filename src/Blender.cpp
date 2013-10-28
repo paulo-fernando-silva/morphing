@@ -22,16 +22,18 @@
  * THE SOFTWARE.
  */
 
-#include "Blender.hpp"
-#include "glBlendWidget.hpp"
-#include "Animation.hpp"
-#include "SaveHelper.hpp"
 #include "QRTT.hpp"
+#include "Blender.hpp"
+#include "SaveHelper.hpp"
+#include "Animation.hpp"
+#include "glBlendWidget.hpp"
 #include "SignalBlocker.hpp"
 
+#include <QProgressDialog>
 #include <QGridLayout>
 #include <QSlider>
 #include <QLabel>
+
 #include <cassert>
 
 
@@ -195,11 +197,9 @@ void Blender::blendFactorChanged(float t) {
 
 bool Blender::save(const QString& uri) {
     assert(uri.size() != 0);
-
     const SaveHelper sh(this, MAX_FPS);
     unsigned number_of_frames(numberOfFrames());
     assert(number_of_frames != 0);
-
     if(bidirectional())
         number_of_frames = number_of_frames * 2 - 1;
 
@@ -208,11 +208,17 @@ bool Blender::save(const QString& uri) {
     const unsigned w(rtt.width()), h(rtt.height());
     Animation animation;
     animation.reserve(number_of_frames);
+    QProgressDialog progress("Saving...", "Cancel", 0, number_of_frames, this);
+    progress.setMinimumDuration(1);
+    progress.setWindowModality(Qt::WindowModal);
 
     for(unsigned i(0); i != number_of_frames; ++i) {
+        progress.setValue(i);
+        if(progress.wasCanceled())
+            return false;
+
         widget()->paintGL();
         rtt.grabPixels();
-
         if(not animation.addFrame(w, h, rtt.pixels().get(), delay))
             return false;
 
@@ -221,7 +227,4 @@ bool Blender::save(const QString& uri) {
 
     return animation.save(uri.toStdString());
 }
-
-
-
 
