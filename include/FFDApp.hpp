@@ -116,6 +116,8 @@ protected:
 
 private:
     void setupTimer();
+    void startTimer();
+    void stopTimer();
 
     void setupToolbar();
     void setupMenus();

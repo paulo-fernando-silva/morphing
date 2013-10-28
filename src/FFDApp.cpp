@@ -408,9 +408,9 @@ void FFDApp::fps(int n) {
     _mix->fps(n);
 
     if(n == 0)
-        _timer->stop();
+        stopTimer();
     else
-        _timer->start(1000.0f / n);
+        startTimer();
 
     if(_fps_sb->value() != int(_mix->fps())) {
         const SignalBlocker block(_fps_sb);
@@ -698,12 +698,14 @@ bool FFDApp::saveImage(const QString& uri) {
 
 
 bool FFDApp::saveAnimation(const QString& uri) {
-    if(_mix->save(uri)) {
-        _anim_uri = uri;
-        return true;
-    }
+    stopTimer();
+    const bool saved(_mix->save(uri));
+    startTimer();
 
-    return false;
+    if(saved)
+        _anim_uri = uri;
+
+    return saved;
 }
 
 
@@ -943,6 +945,18 @@ void FFDApp::syncAnimState() {
         playAnimation();
     else
         pauseAnimation();
+}
+
+
+void FFDApp::startTimer() {
+    const unsigned n(_mix->fps());
+    assert(n != 0);
+    _timer->start(1000.0f / n);
+}
+
+
+void FFDApp::stopTimer() {
+    _timer->stop();
 }
 
 
