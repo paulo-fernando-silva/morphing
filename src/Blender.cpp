@@ -209,7 +209,7 @@ bool Blender::save(const QString& uri) {
     Animation animation;
     animation.reserve(number_of_frames);
     QProgressDialog progress("Saving...", "Cancel", 0, number_of_frames, this);
-    progress.setMinimumDuration(1);
+    progress.setMinimumDuration(0);
     progress.setWindowModality(Qt::WindowModal);
 
     for(unsigned i(0); i != number_of_frames; ++i) {
