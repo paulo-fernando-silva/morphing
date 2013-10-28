@@ -285,8 +285,6 @@ void FFDApp::connectDataUI() {
 
     connect(src_wgt, SIGNAL(dragEnter(QDragEnterEvent*)),
             this, SLOT(dragEnterEvent(QDragEnterEvent*)));
-    connect(bln_wgt, SIGNAL(dragEnter(QDragEnterEvent*)),
-            this, SLOT(dragEnterEvent(QDragEnterEvent*)));
     connect(dst_wgt, SIGNAL(dragEnter(QDragEnterEvent*)),
             this, SLOT(dragEnterEvent(QDragEnterEvent*)));
 
