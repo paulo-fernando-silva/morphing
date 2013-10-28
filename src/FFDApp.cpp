@@ -264,7 +264,6 @@ void FFDApp::initDataUI() {
 
 
 void FFDApp::connectDataUI() {
-    glBlendWidget* const bln_wgt(_mix->widget());
     glFFDWidget* const src_wgt(_src->widget());
     glFFDWidget* const dst_wgt(_dst->widget());
 
