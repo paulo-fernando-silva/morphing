@@ -76,6 +76,7 @@ void FFDWidget::tex(int idx) {
         const Resource& resource(mgr()->resource(idx));
         files()->setToolTip(resource.uri);
         widget()->tex(resource.glid);
+        widget()->uri(resource.uri);
     }
 }
 
@@ -120,7 +121,6 @@ void FFDWidget::select(const int i) {
     assert(NO_SELECTION <= i and i < files()->count());
 
     files()->setCurrentIndex(i);
-    widget()->uri(selectionURI());
 }
 
 
