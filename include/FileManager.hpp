@@ -36,83 +36,83 @@ class QGLWidget;
 
 
 class FileManager : public QObject {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    struct Resource {
-        Resource(const QString& uri, const unsigned glid);
-        QString uri;
-        QString name;
-        unsigned glid;
-    };
+	struct Resource {
+		Resource(const QString& uri, const unsigned glid);
+		QString uri;
+		QString name;
+		unsigned glid;
+	};
 
-    typedef std::vector<Resource> Resources;
-    typedef Resources::iterator Iterator;
-    typedef Resources::const_iterator ConstIterator;
-    typedef Resources::size_type Size;
+	typedef std::vector<Resource> Resources;
+	typedef Resources::iterator Iterator;
+	typedef Resources::const_iterator ConstIterator;
+	typedef Resources::size_type Size;
 
-    FileManager(QGLWidget* const ctx);
-    ~FileManager();
+	FileManager(QGLWidget* const ctx);
+	~FileManager();
 
-    void clear();
+	void clear();
 
-    bool add(const QPixmap& img, const QString& uri);
+	bool add(const QPixmap& img, const QString& uri);
 
-    void add(const Resource& resource);
-
-
-    inline bool empty() const {
-        return _resources.empty();
-    }
+	void add(const Resource& resource);
 
 
-    inline Resource& front() {
-        return _resources.front();
-    }
+	inline bool empty() const {
+		return _resources.empty();
+	}
 
 
-    inline Resource& back() {
-        return _resources.back();
-    }
+	inline Resource& front() {
+		return _resources.front();
+	}
 
 
-    inline const Resource& front() const {
-        return _resources.front();
-    }
+	inline Resource& back() {
+		return _resources.back();
+	}
 
 
-    inline const Resource& back() const {
-        return _resources.back();
-    }
+	inline const Resource& front() const {
+		return _resources.front();
+	}
 
 
-    inline Size size() const {
-        return _resources.size();
-    }
+	inline const Resource& back() const {
+		return _resources.back();
+	}
 
 
-    inline const Resource& resource(const unsigned i) const {
-        assert(i < _resources.size());
-        return _resources[i];
-    }
+	inline Size size() const {
+		return _resources.size();
+	}
 
 
-    bool loadImage(const QString& uri);
+	inline const Resource& resource(const unsigned i) const {
+		assert(i < _resources.size());
+		return _resources[i];
+	}
 
 
-    bool exists(const QString& uri) const;
+	bool loadImage(const QString& uri);
 
-    inline QGLWidget* ctx() const {
-        return _ctx;
-    }
+
+	bool exists(const QString& uri) const;
+
+	inline QGLWidget* ctx() const {
+		return _ctx;
+	}
 
 
 signals:
-    void filesChanged();
+	void filesChanged();
 
 
 private:
-    QGLWidget* _ctx;
-    Resources _resources;
+	QGLWidget* _ctx;
+	Resources _resources;
 };
 
 

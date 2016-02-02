@@ -31,21 +31,21 @@
 
 class SignalBlocker {
 public:
-    SignalBlocker(QObject* const obj):
-        _obj(obj)
-    {
-        assert(_obj);
-        _obj->blockSignals(true);
-    }
+	SignalBlocker(QObject* const obj):
+		_obj(obj)
+	{
+		assert(_obj);
+		_obj->blockSignals(true);
+	}
 
 
-    ~SignalBlocker() {
-        _obj->blockSignals(false);
-    }
+	~SignalBlocker() {
+		_obj->blockSignals(false);
+	}
 
 
 private:
-    QObject* _obj;
+	QObject* _obj;
 };
 
 

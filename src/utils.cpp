@@ -29,114 +29,114 @@
 
 
 void interpolate(const Mesh& a,
-                 const Mesh& b,
-                 const float& t,
-                 Mesh& msh)
+				 const Mesh& b,
+				 const float& t,
+				 Mesh& msh)
 {
-    assert(0.0f <= t and t <= 1.0f);
-    assert(not a.empty());
-    const unsigned a_size(a.size());
-    const unsigned b_size(b.size());
-    assert(a_size == b_size);
+	assert(0.0f <= t and t <= 1.0f);
+	assert(not a.empty());
+	const unsigned a_size(a.size());
+	const unsigned b_size(b.size());
+	assert(a_size == b_size);
 
-    msh.resize(a_size);
+	msh.resize(a_size);
 
-    for(unsigned i(0); i != a_size; ++i)
-        msh[i] = a[i] * (1.0f - t) + b[i] * t;
+	for(unsigned i(0); i != a_size; ++i)
+		msh[i] = a[i] * (1.0f - t) + b[i] * t;
 }
 
 
 bool glBlendAlphaEquals(const float& a) {
-    float bc[4] = {-1.0f, -1.0f, -1.0f, -1.0f};
-    glGetFloatv(GL_BLEND_COLOR, bc);
-    const bool equal(bc[3] == a);
+	float bc[4] = {-1.0f, -1.0f, -1.0f, -1.0f};
+	glGetFloatv(GL_BLEND_COLOR, bc);
+	const bool equal(bc[3] == a);
 
-    if(not equal) {
-        cgl::printGlError();
-        return false;
-    }
+	if(not equal) {
+		cgl::printGlError();
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 
 void draw(const int tex,
-          const Mesh& mesh,
-          const Mesh& tc,
-          const Faces& faces)
+		  const Mesh& mesh,
+		  const Mesh& tc,
+		  const Faces& faces)
 {
-    assert(tex != 0);
-    assert(not mesh.empty());
-    assert(mesh.size() == tc.size());
-    assert(not faces.empty());
+	assert(tex != 0);
+	assert(not mesh.empty());
+	assert(mesh.size() == tc.size());
+	assert(not faces.empty());
 
-    const cgl::BindTexture2D bind(tex);
+	const cgl::BindTexture2D bind(tex);
 
-    glTexCoordPointer(2, GL_FLOAT, 0, &tc.front().x);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(2, GL_FLOAT, 0, &mesh.front().x);
-    glEnableClientState(GL_VERTEX_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, &tc.front().x);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, &mesh.front().x);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
-    glDrawElements(GL_TRIANGLES, faces.size() * 3,
-                   GL_UNSIGNED_INT, &faces.front().a);
+	glDrawElements(GL_TRIANGLES, faces.size() * 3,
+				   GL_UNSIGNED_INT, &faces.front().a);
 
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 
 void generateTriangles(const unsigned xdiv,
-                       const unsigned ydiv,
-                       Faces& faces)
+					   const unsigned ydiv,
+					   Faces& faces)
 {
-    const unsigned xpts(xdiv + 1); // number of points in x
-    const unsigned NF(2 * xdiv * ydiv); // total number of faces
+	const unsigned xpts(xdiv + 1); // number of points in x
+	const unsigned NF(2 * xdiv * ydiv); // total number of faces
 
-    faces.reserve(NF);
+	faces.reserve(NF);
 
-    for(unsigned y(0); y != ydiv; ++y)
-        for(unsigned x(0); x != xdiv; ++x) {
-            const unsigned a(y * xpts + x);
-            const unsigned b(a + 1);
-            const unsigned c(b + xdiv);
-            const unsigned d(c + 1);
+	for(unsigned y(0); y != ydiv; ++y)
+		for(unsigned x(0); x != xdiv; ++x) {
+			const unsigned a(y * xpts + x);
+			const unsigned b(a + 1);
+			const unsigned c(b + xdiv);
+			const unsigned d(c + 1);
 
-            faces.push_back(Trig(a, b, d));
-            faces.push_back(Trig(a, d, c));
-        }
+			faces.push_back(Trig(a, b, d));
+			faces.push_back(Trig(a, d, c));
+		}
 
-    assert(faces.size() == NF);
+	assert(faces.size() == NF);
 }
 
 
 void drawBlended(const Mesh& src_mesh,
-                 const Mesh& dst_mesh,
-                 const Faces& faces,
-                 const int src_tex,
-                 const int dst_tex,
-                 const float t)
+				 const Mesh& dst_mesh,
+				 const Faces& faces,
+				 const int src_tex,
+				 const int dst_tex,
+				 const float t)
 {
-    Mesh mesh;
-    interpolate(src_mesh, dst_mesh, t, mesh);
+	Mesh mesh;
+	interpolate(src_mesh, dst_mesh, t, mesh);
 
-    if(src_tex != 0) {
-        glDisable(GL_BLEND);
-        draw(src_tex, mesh, src_mesh, faces);
-    }
+	if(src_tex != 0) {
+		glDisable(GL_BLEND);
+		draw(src_tex, mesh, src_mesh, faces);
+	}
 
-    if(dst_tex != 0 and glBlendColor != 0) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
+	if(dst_tex != 0 and glBlendColor != 0) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
 
-        if(not glBlendAlphaEquals(t)) {
-            glBlendColor(0.0f, 0.0f, 0.0f, t);
-            assert(glBlendAlphaEquals(t));
-        }
+		if(not glBlendAlphaEquals(t)) {
+			glBlendColor(0.0f, 0.0f, 0.0f, t);
+			assert(glBlendAlphaEquals(t));
+		}
 
-        draw(dst_tex, mesh, dst_mesh, faces);
-    }
+		draw(dst_tex, mesh, dst_mesh, faces);
+	}
 
-    glDisable(GL_BLEND);
+	glDisable(GL_BLEND);
 }
 
 

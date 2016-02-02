@@ -36,37 +36,37 @@ class QGLFramebufferObject;
 
 class QRTT {
 public:
-    typedef unsigned char byte;
-    typedef boost::scoped_array<byte> BytePtr;
+	typedef unsigned char byte;
+	typedef boost::scoped_array<byte> BytePtr;
 
-    QRTT(QGLWidget* const widget, const QSize& dim);
+	QRTT(QGLWidget* const widget, const QSize& dim);
 
-    ~QRTT();
+	~QRTT();
 
-    void grabPixels();
+	void grabPixels();
 
-    inline const BytePtr& pixels() const {
-        return _pixels;
-    }
+	inline const BytePtr& pixels() const {
+		return _pixels;
+	}
 
-    unsigned width() const;
+	unsigned width() const;
 
-    unsigned height() const;
-
-
-    QImage toImage() const;
+	unsigned height() const;
 
 
-private:
-    void bind();
-    void unbind();
+	QImage toImage() const;
 
 
 private:
-    typedef boost::scoped_ptr<QGLFramebufferObject> FBOPtr;
-    QGLWidget* _widget;
-    BytePtr _pixels;
-    FBOPtr _fbo;
+	void bind();
+	void unbind();
+
+
+private:
+	typedef boost::scoped_ptr<QGLFramebufferObject> FBOPtr;
+	QGLWidget* _widget;
+	BytePtr _pixels;
+	FBOPtr _fbo;
 };
 
 

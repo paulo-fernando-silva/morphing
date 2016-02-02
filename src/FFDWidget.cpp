@@ -36,105 +36,105 @@ const int NO_SELECTION(-1);
 
 
 FFDWidget::FFDWidget(QWidget* const parent,
-                     const QString& title,
-                     QGLWidget* const shared_widget,
-                     const FileManagerPtr& file_mgr):
-    QWidget(parent),
-    _widget(0),
-    _title(0),
-    _files(0),
-    _file_mgr(file_mgr)
+					 const QString& title,
+					 QGLWidget* const shared_widget,
+					 const FileManagerPtr& file_mgr):
+	QWidget(parent),
+	_widget(0),
+	_title(0),
+	_files(0),
+	_file_mgr(file_mgr)
 {
-    setupUI(title, shared_widget);
-    connect(mgr().get(), SIGNAL(filesChanged()), this, SLOT(filesChanged()));
+	setupUI(title, shared_widget);
+	connect(mgr().get(), SIGNAL(filesChanged()), this, SLOT(filesChanged()));
 }
 
 
 void FFDWidget::setupUI(const QString& title, QGLWidget *const shared_widget) {
-    _widget = new glFFDWidget(this, shared_widget);
+	_widget = new glFFDWidget(this, shared_widget);
 
-    _title = new QLabel(title);
-    _title->setAlignment(Qt::AlignCenter);
+	_title = new QLabel(title);
+	_title->setAlignment(Qt::AlignCenter);
 
-    _files = new QComboBox();
-    connect(_files, SIGNAL(currentIndexChanged(int)), this, SLOT(tex(int)));
+	_files = new QComboBox();
+	connect(_files, SIGNAL(currentIndexChanged(int)), this, SLOT(tex(int)));
 
-    QGridLayout* const layout(new QGridLayout);
+	QGridLayout* const layout(new QGridLayout);
 
-    layout->addWidget(_title, 0, 0);
-    layout->addWidget(widget(), 1, 0);
-    layout->addWidget(_files, 2, 0);
+	layout->addWidget(_title, 0, 0);
+	layout->addWidget(widget(), 1, 0);
+	layout->addWidget(_files, 2, 0);
 
-    setLayout(layout);
+	setLayout(layout);
 }
 
 
 void FFDWidget::tex(int idx) {
-    typedef FileManager::Resource Resource;
+	typedef FileManager::Resource Resource;
 
-    if(0 <= idx and unsigned(idx) < mgr()->size()) {
-        const Resource& resource(mgr()->resource(idx));
-        files()->setToolTip(resource.uri);
-        widget()->tex(resource.glid);
-        widget()->uri(resource.uri);
-    }
+	if(0 <= idx and unsigned(idx) < mgr()->size()) {
+		const Resource& resource(mgr()->resource(idx));
+		files()->setToolTip(resource.uri);
+		widget()->tex(resource.glid);
+		widget()->uri(resource.uri);
+	}
 }
 
 
 void FFDWidget::filesChanged() {
-    typedef FileManager::Size Size;
+	typedef FileManager::Size Size;
 
-    const SignalBlocker blocker(files());
-    files()->clear();
+	const SignalBlocker blocker(files());
+	files()->clear();
 
-    const Size N(mgr()->size());
+	const Size N(mgr()->size());
 
-    for(Size i(0); i != N; ++i)
-        files()->addItem(mgr()->resource(i).name);
+	for(Size i(0); i != N; ++i)
+		files()->addItem(mgr()->resource(i).name);
 
-    if(N != 0) {
-        files()->setCurrentIndex(N - 1);
-        tex(files()->currentIndex());
-    } else
-        clear();
+	if(N != 0) {
+		files()->setCurrentIndex(N - 1);
+		tex(files()->currentIndex());
+	} else
+		clear();
 }
 
 
 void FFDWidget::update() {
-    widget()->updateGL();
+	widget()->updateGL();
 }
 
 
 void FFDWidget::clear() {
-    widget()->clear();
-    files()->clear();
-    files()->setToolTip("");
+	widget()->clear();
+	files()->clear();
+	files()->setToolTip("");
 }
 
 
 int FFDWidget::selection() const {
-    return files()->currentIndex();
+	return files()->currentIndex();
 }
 
 
 void FFDWidget::select(const int i) {
-    assert(NO_SELECTION <= i and i < files()->count());
+	assert(NO_SELECTION <= i and i < files()->count());
 
-    files()->setCurrentIndex(i);
+	files()->setCurrentIndex(i);
 }
 
 
 QString FFDWidget::selectionURI() const {
-    const int sel(selection());
+	const int sel(selection());
 
-    if(sel == NO_SELECTION)
-        return QString();
+	if(sel == NO_SELECTION)
+		return QString();
 
-    return mgr()->resource(sel).uri;
+	return mgr()->resource(sel).uri;
 }
 
 
 bool FFDWidget::hasSelection() const {
-    return selection() != NO_SELECTION;
+	return selection() != NO_SELECTION;
 }
 

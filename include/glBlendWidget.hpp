@@ -37,81 +37,81 @@ class glFFDWidget;
 
 
 class glBlendWidget : public QGLWidget {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    glBlendWidget(QWidget* const parent);
+	glBlendWidget(QWidget* const parent);
 
-    ~glBlendWidget();
-
-
-    void src(glFFDWidget* const w);
+	~glBlendWidget();
 
 
-    inline glFFDWidget* src() const {
-        return _src;
-    }
+	void src(glFFDWidget* const w);
 
 
-    void dst(glFFDWidget* const w);
+	inline glFFDWidget* src() const {
+		return _src;
+	}
 
 
-    inline glFFDWidget* dst() const {
-        return _dst;
-    }
+	void dst(glFFDWidget* const w);
 
 
-    inline const float& blendFactor() const {
-        return _t;
-    }
+	inline glFFDWidget* dst() const {
+		return _dst;
+	}
 
 
-    void updateFaces();
+	inline const float& blendFactor() const {
+		return _t;
+	}
 
-    // made public to help with rtt
-    void paintGL();
 
-    /**
-     * @brief frame a SLOW but simple way of capturing the current frame
-     * @return a QImage representing the widget's contents.
-     * @pre #canPaint
-     */
-    QImage frame();
+	void updateFaces();
 
-    bool canPaint() const;
+	// made public to help with rtt
+	void paintGL();
 
-    QSize maxImgDim();
+	/**
+	 * @brief frame a SLOW but simple way of capturing the current frame
+	 * @return a QImage representing the widget's contents.
+	 * @pre #canPaint
+	 */
+	QImage frame();
+
+	bool canPaint() const;
+
+	QSize maxImgDim();
 
 
 signals:
-    void blendFactorChanged(float t);
+	void blendFactorChanged(float t);
 
 
 public slots:
-    void blendFactor(float t);
+	void blendFactor(float t);
 
 
 protected:
-    void initializeGL();
-    void resizeGL(int width, int height);
+	void initializeGL();
+	void resizeGL(int width, int height);
 
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
+	void mousePressEvent(QMouseEvent* event);
+	void mouseMoveEvent(QMouseEvent* event);
 
-    inline const Faces& faces() {
-        return _faces;
-    }
+	inline const Faces& faces() {
+		return _faces;
+	}
 
-    bool invariant() const;
+	bool invariant() const;
 
-    void dragEvent();
+	void dragEvent();
 
 
 private:
-    float _t;
-    glFFDWidget* _src;
-    glFFDWidget* _dst;
-    Faces _faces;
-    QPoint _mouse_press_pos;
+	float _t;
+	glFFDWidget* _src;
+	glFFDWidget* _dst;
+	Faces _faces;
+	QPoint _mouse_press_pos;
 };
 
 

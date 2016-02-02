@@ -32,20 +32,20 @@
 const char* const RGBA("RGBA");
 
 struct Animation::PImpl {
-    typedef Magick::Image Image;
-    typedef std::vector<Image> Frames;
-    Frames _frames;
+	typedef Magick::Image Image;
+	typedef std::vector<Image> Frames;
+	Frames _frames;
 };
 
 
 Animation::Animation():
-    _pimpl(new PImpl)
+	_pimpl(new PImpl)
 {
-    static bool once(false);
-    if(not once) {
-        Magick::InitializeMagick(0);
-        once = true;
-    }
+	static bool once(false);
+	if(not once) {
+		Magick::InitializeMagick(0);
+		once = true;
+	}
 }
 
 
@@ -53,60 +53,60 @@ Animation::~Animation() {}
 
 
 bool Animation::addFrame(const unsigned w,
-                         const unsigned h,
-                         const byte* const bytes,
-                         const unsigned delay)
+						 const unsigned h,
+						 const byte* const bytes,
+						 const unsigned delay)
 {
-    typedef Magick::Image Image;
-    try {
-        _pimpl->_frames.push_back(Image(w, h, RGBA, Magick::CharPixel, bytes));
-        _pimpl->_frames.back().animationDelay(delay);
-        _pimpl->_frames.back().flip();
-    } catch(const Magick::Exception& e) {
-        std::cerr << "Animation::addFrame: Magick++ exception: "
-                  << e.what() << std::endl;
-        return false;
-    }
+	typedef Magick::Image Image;
+	try {
+		_pimpl->_frames.push_back(Image(w, h, RGBA, Magick::CharPixel, bytes));
+		_pimpl->_frames.back().animationDelay(delay);
+		_pimpl->_frames.back().flip();
+	} catch(const Magick::Exception& e) {
+		std::cerr << "Animation::addFrame: Magick++ exception: "
+				  << e.what() << std::endl;
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 
 bool Animation::empty() const {
-    return _pimpl->_frames.empty();
+	return _pimpl->_frames.empty();
 }
 
 
 unsigned Animation::frameCount() {
-    return _pimpl->_frames.size();
+	return _pimpl->_frames.size();
 }
 
 
 void Animation::clear() {
-    return _pimpl->_frames.clear();
+	return _pimpl->_frames.clear();
 }
 
 
 void Animation::reserve(const unsigned size) {
-    _pimpl->_frames.reserve(size);
+	_pimpl->_frames.reserve(size);
 }
 
 
 bool Animation::save(const std::string& uri) {
-    if(empty() or uri.empty())
-        return false;
+	if(empty() or uri.empty())
+		return false;
 
-    try {
-        Magick::writeImages(_pimpl->_frames.begin(),
-                            _pimpl->_frames.end(),
-                            uri);
-    } catch(const Magick::Exception& e) {
-        std::cerr << "Animation::save: Magick++ exception: "
-                  << e.what() << std::endl;
-        return false;
-    }
+	try {
+		Magick::writeImages(_pimpl->_frames.begin(),
+							_pimpl->_frames.end(),
+							uri);
+	} catch(const Magick::Exception& e) {
+		std::cerr << "Animation::save: Magick++ exception: "
+				  << e.what() << std::endl;
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 

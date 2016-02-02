@@ -36,29 +36,29 @@
  */
 class SaveHelper {
 public:
-    SaveHelper(Blender* const blender, const unsigned max_fps);
+	SaveHelper(Blender* const blender, const unsigned max_fps);
 
-    ~SaveHelper();
+	~SaveHelper();
 
-    /// in max_fps over fps ratio
-    unsigned delay() const;
-
-
-private:
-    void saveBlenderState();
-    void loadBlenderState();
-    void setup();
+	/// in max_fps over fps ratio
+	unsigned delay() const;
 
 
 private:
-    Blender* _blender;
-    // Old blender state. No need to consider if it's animated,
-    // as the stepping is independent of that.
-    Blender::AnimDir _anim_dir;
-    bool _animated;
-    unsigned _fps;
-    float _t;
-    unsigned _max_fps;
+	void saveBlenderState();
+	void loadBlenderState();
+	void setup();
+
+
+private:
+	Blender* _blender;
+	// Old blender state. No need to consider if it's animated,
+	// as the stepping is independent of that.
+	Blender::AnimDir _anim_dir;
+	bool _animated;
+	unsigned _fps;
+	float _t;
+	unsigned _max_fps;
 };
 
 #endif // SAVEHELPER_HPP

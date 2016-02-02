@@ -36,98 +36,98 @@ class QSlider;
 
 
 class Blender : public QWidget {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    enum AnimDir {FRONT = 1, BACK = -1};
+	enum AnimDir {FRONT = 1, BACK = -1};
 
-    Blender(QWidget* const parent, const QString& title);
-
-
-    void update();
-
-    void clear();
+	Blender(QWidget* const parent, const QString& title);
 
 
-    inline glBlendWidget* widget() const {
-        return _widget;
-    }
+	void update();
 
-    // animation duration in milliseconds
-    inline unsigned duration() const {
-        return _duration;
-    }
-
-    inline unsigned fps() const {
-        return _fps;
-    }
+	void clear();
 
 
-    void animationDirection(const AnimDir dir);
+	inline glBlendWidget* widget() const {
+		return _widget;
+	}
 
-    inline AnimDir animationDirection() const {
-        return _anim_dir;
-    }
+	// animation duration in milliseconds
+	inline unsigned duration() const {
+		return _duration;
+	}
 
-
-    void bidirectional(const bool state);
-
-    inline bool bidirectional() const {
-        return _bidirectional;
-    }
-
-
-    void animated(const bool state);
-
-    inline bool animated() const {
-        return _animated;
-    }
+	inline unsigned fps() const {
+		return _fps;
+	}
 
 
-    void frameNumber(const float n);
-    float frameNumber() const;
+	void animationDirection(const AnimDir dir);
 
-    inline unsigned numberOfFrames() const {
-        return fps() * duration() / 1000;
-    }
+	inline AnimDir animationDirection() const {
+		return _anim_dir;
+	}
 
 
-    bool save(const QString& uri);
+	void bidirectional(const bool state);
+
+	inline bool bidirectional() const {
+		return _bidirectional;
+	}
+
+
+	void animated(const bool state);
+
+	inline bool animated() const {
+		return _animated;
+	}
+
+
+	void frameNumber(const float n);
+	float frameNumber() const;
+
+	inline unsigned numberOfFrames() const {
+		return fps() * duration() / 1000;
+	}
+
+
+	bool save(const QString& uri);
 
 
 signals:
-    void animStateChanged();
+	void animStateChanged();
 
 
 public slots:
-    void percent(int p);
-    void blendFactorChanged(float t);
-    void duration(int n);
-    void fps(int f);
+	void percent(int p);
+	void blendFactorChanged(float t);
+	void duration(int n);
+	void fps(int f);
 
 
 private:
-    void setupUI(const QString& title);
+	void setupUI(const QString& title);
 
-    void stepAnimation();
-    float t(const unsigned frame_number) const;
+	void stepAnimation();
+	float t(const unsigned frame_number) const;
 
-    inline QSlider* slider() const {
-        return _slider;
-    }
+	inline QSlider* slider() const {
+		return _slider;
+	}
 
 
 private:
-    AnimDir _anim_dir;
+	AnimDir _anim_dir;
 
-    glBlendWidget* _widget;
+	glBlendWidget* _widget;
 
-    QLabel* _title;
-    QSlider* _slider;
+	QLabel* _title;
+	QSlider* _slider;
 
-    bool _animated;
-    bool _bidirectional;
-    unsigned _duration;
-    unsigned _fps;
+	bool _animated;
+	bool _bidirectional;
+	unsigned _duration;
+	unsigned _fps;
 };
 
 #endif // BLENDER_HPP

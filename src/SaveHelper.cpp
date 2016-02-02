@@ -33,47 +33,47 @@ const unsigned MIN_FRAMES(1);
 
 
 SaveHelper::SaveHelper(Blender* const blender,
-                       const unsigned max_fps):
-    _blender(blender),
-    _max_fps(max_fps)
+					   const unsigned max_fps):
+	_blender(blender),
+	_max_fps(max_fps)
 {
-    assert(blender != 0);
-    saveBlenderState();
-    setup();
+	assert(blender != 0);
+	saveBlenderState();
+	setup();
 }
 
 
 SaveHelper::~SaveHelper() {
-    loadBlenderState();
+	loadBlenderState();
 }
 
 
 void SaveHelper::saveBlenderState() {
-    _animated = _blender->animated();
-    _anim_dir = _blender->animationDirection();
-    _fps = _blender->fps();
-    _t = _blender->widget()->blendFactor();
+	_animated = _blender->animated();
+	_anim_dir = _blender->animationDirection();
+	_fps = _blender->fps();
+	_t = _blender->widget()->blendFactor();
 }
 
 
 void SaveHelper::loadBlenderState() {
-    _blender->animated(_animated);
-    _blender->animationDirection(_anim_dir);
-    _blender->fps(_fps);
-    _blender->widget()->blendFactor(_t);
+	_blender->animated(_animated);
+	_blender->animationDirection(_anim_dir);
+	_blender->fps(_fps);
+	_blender->widget()->blendFactor(_t);
 }
 
 
 void SaveHelper::setup() {
-    _blender->animated(false);
-    _blender->animationDirection(Blender::FRONT);
-    _blender->fps(std::min(std::max(_fps, MIN_FRAMES), _max_fps));
-    _blender->widget()->blendFactor(0.0f);
+	_blender->animated(false);
+	_blender->animationDirection(Blender::FRONT);
+	_blender->fps(std::min(std::max(_fps, MIN_FRAMES), _max_fps));
+	_blender->widget()->blendFactor(0.0f);
 }
 
 
 unsigned SaveHelper::delay() const {
-    return _max_fps / _blender->fps();
+	return _max_fps / _blender->fps();
 }
 
 

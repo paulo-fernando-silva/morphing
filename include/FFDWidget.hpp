@@ -39,60 +39,60 @@ class QGLWidget;
 
 
 class FFDWidget : public QWidget {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    typedef boost::shared_ptr<FileManager> FileManagerPtr;
+	typedef boost::shared_ptr<FileManager> FileManagerPtr;
 
-    FFDWidget(QWidget* const parent,
-              const QString& title,
-              QGLWidget* const shared_widget,
-              const FileManagerPtr& file_mgr);
-
-
-    void update();
-
-    void clear();
+	FFDWidget(QWidget* const parent,
+			  const QString& title,
+			  QGLWidget* const shared_widget,
+			  const FileManagerPtr& file_mgr);
 
 
-    inline glFFDWidget* widget() const {
-        return _widget;
-    }
+	void update();
+
+	void clear();
 
 
-    inline const FileManagerPtr& mgr() const {
-        return _file_mgr;
-    }
+	inline glFFDWidget* widget() const {
+		return _widget;
+	}
 
 
-    QString selectionURI() const;
+	inline const FileManagerPtr& mgr() const {
+		return _file_mgr;
+	}
 
-    int selection() const;
 
-    void select(const int i);
+	QString selectionURI() const;
 
-    bool hasSelection() const;
+	int selection() const;
+
+	void select(const int i);
+
+	bool hasSelection() const;
 
 
 public slots:
-    void tex(int);
+	void tex(int);
 
-    void filesChanged();
-
-
-private:
-    void setupUI(const QString& title,
-                 QGLWidget* const shared_widget);
-
-    inline QComboBox* files() const {
-        return _files;
-    }
+	void filesChanged();
 
 
 private:
-    glFFDWidget* _widget;
-    QLabel* _title;
-    QComboBox* _files;
-    FileManagerPtr _file_mgr;
+	void setupUI(const QString& title,
+				 QGLWidget* const shared_widget);
+
+	inline QComboBox* files() const {
+		return _files;
+	}
+
+
+private:
+	glFFDWidget* _widget;
+	QLabel* _title;
+	QComboBox* _files;
+	FileManagerPtr _file_mgr;
 };
 
 #endif // FFDWIDGET_HPP

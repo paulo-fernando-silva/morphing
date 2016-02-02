@@ -32,56 +32,56 @@
 
 
 QRTT::QRTT(QGLWidget* const widget, const QSize& dim):
-    _widget(widget)
+	_widget(widget)
 {
-    assert(_widget != 0);
+	assert(_widget != 0);
 
-    if(_widget->context() != QGLContext::currentContext())
-        _widget->makeCurrent();
+	if(_widget->context() != QGLContext::currentContext())
+		_widget->makeCurrent();
 
-    _fbo.reset(new QGLFramebufferObject(dim.width(), dim.height()));
-    _pixels.reset(new byte[dim.width() * dim.height() * 4]);
+	_fbo.reset(new QGLFramebufferObject(dim.width(), dim.height()));
+	_pixels.reset(new byte[dim.width() * dim.height() * 4]);
 
-    bind();
+	bind();
 }
 
 
 QRTT::~QRTT() {
-    unbind();
+	unbind();
 }
 
 
 unsigned QRTT::width() const {
-    return _fbo->size().width();
+	return _fbo->size().width();
 }
 
 
 unsigned QRTT::height() const {
-    return _fbo->size().height();
+	return _fbo->size().height();
 }
 
 
 void QRTT::bind() {
-    assert(_fbo->bind());
-    cgl::view2D(cgl::uvec2(), uvec2(width(), height()));
+	assert(_fbo->bind());
+	cgl::view2D(cgl::uvec2(), uvec2(width(), height()));
 }
 
 
 void QRTT::unbind() {
-    assert(_fbo->release());
-    const uvec2 dim(_widget->width(), _widget->height());
-    cgl::view2D(cgl::uvec2(), dim);
+	assert(_fbo->release());
+	const uvec2 dim(_widget->width(), _widget->height());
+	cgl::view2D(cgl::uvec2(), dim);
 }
 
 
 void QRTT::grabPixels() {
-    glReadPixels(0, 0,  width(), height(), GL_RGBA,
-                 GL_UNSIGNED_BYTE, _pixels.get());
+	glReadPixels(0, 0,  width(), height(), GL_RGBA,
+				 GL_UNSIGNED_BYTE, _pixels.get());
 }
 
 
 QImage QRTT::toImage() const {
-    return _fbo->toImage();
+	return _fbo->toImage();
 }
 
 

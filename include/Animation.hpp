@@ -31,46 +31,46 @@
 
 class Animation {
 public:
-    typedef unsigned char byte;
+	typedef unsigned char byte;
 
-    Animation();
+	Animation();
 
-    ~Animation();
+	~Animation();
 
-    /**
-     * @brief addFrame add a frame to this animation
-     * @param w the width in pixels
-     * @param h the height in pixels
-     * @param bytes the image data rgba
-     * @param delay the duration of this frame in milliseconds
-     * @return true if the frame was created successfully.
-     */
-    bool addFrame(const unsigned w,
-                  const unsigned h,
-                  const byte* const bytes,
-                  const unsigned delay);
+	/**
+	 * @brief addFrame add a frame to this animation
+	 * @param w the width in pixels
+	 * @param h the height in pixels
+	 * @param bytes the image data rgba
+	 * @param delay the duration of this frame in milliseconds
+	 * @return true if the frame was created successfully.
+	 */
+	bool addFrame(const unsigned w,
+				  const unsigned h,
+				  const byte* const bytes,
+				  const unsigned delay);
 
-    unsigned frameCount();
+	unsigned frameCount();
 
-    void clear();
+	void clear();
 
-    bool empty() const;
+	bool empty() const;
 
-    void reserve(const unsigned size);
+	void reserve(const unsigned size);
 
 
-    /**
-     * @brief save file to uri
-     * @param uri the filename
-     * @return true if successful
-     */
-    bool save(const std::string& uri);
+	/**
+	 * @brief save file to uri
+	 * @param uri the filename
+	 * @return true if successful
+	 */
+	bool save(const std::string& uri);
 
 
 private:
-    struct PImpl;
-    typedef boost::scoped_ptr<PImpl> PImplPtr;
-    PImplPtr _pimpl;
+	struct PImpl;
+	typedef boost::scoped_ptr<PImpl> PImplPtr;
+	PImplPtr _pimpl;
 };
 
 #endif // ANIMATION_HPP

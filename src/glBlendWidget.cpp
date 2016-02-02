@@ -40,12 +40,12 @@ const color CLEAR_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 
 glBlendWidget::glBlendWidget(QWidget* parent):
-    QGLWidget(parent),
-    _t(0.0f),
-    _src(0),
-    _dst(0)
+	QGLWidget(parent),
+	_t(0.0f),
+	_src(0),
+	_dst(0)
 {
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 
@@ -53,130 +53,130 @@ glBlendWidget::~glBlendWidget() {}
 
 
 void glBlendWidget::src(glFFDWidget* const w) {
-    _src = w;
-    assert(invariant());
-    updateFaces();
+	_src = w;
+	assert(invariant());
+	updateFaces();
 }
 
 
 void glBlendWidget::dst(glFFDWidget* const w) {
-    _dst = w;
-    assert(invariant());
-    updateFaces();
+	_dst = w;
+	assert(invariant());
+	updateFaces();
 }
 
 
 bool glBlendWidget::invariant() const {
-    return  (src() == 0 or dst() == 0) or
-            (src()->mesh().size() == dst()->mesh().size());
+	return  (src() == 0 or dst() == 0) or
+			(src()->mesh().size() == dst()->mesh().size());
 }
 
 
 void glBlendWidget::blendFactor(float t) {
-    _t = std::min(std::max(t, 0.0f), 1.0f);
-    emit blendFactorChanged(_t);
+	_t = std::min(std::max(t, 0.0f), 1.0f);
+	emit blendFactorChanged(_t);
 }
 
 
 bool glBlendWidget::canPaint() const {
-    return src() != 0 and dst() != 0 and
-            (src()->tex() != 0 or dst()->tex() != 0);
+	return src() != 0 and dst() != 0 and
+			(src()->tex() != 0 or dst()->tex() != 0);
 }
 
 void glBlendWidget::paintGL() {
-    glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-    if(canPaint())
-        drawBlended(src()->mesh(), dst()->mesh(), faces(),
-                    src()->tex(), dst()->tex(), blendFactor());
+	if(canPaint())
+		drawBlended(src()->mesh(), dst()->mesh(), faces(),
+					src()->tex(), dst()->tex(), blendFactor());
 }
 
 
 void glBlendWidget::initializeGL() {
-    glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
-    cgl::view2D(uvec2(), uvec2(width(), height()));
+	glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
+	cgl::view2D(uvec2(), uvec2(width(), height()));
 }
 
 
 void glBlendWidget::resizeGL(int width, int height) {
-    cgl::view2D(uvec2(), uvec2(width, height));
+	cgl::view2D(uvec2(), uvec2(width, height));
 }
 
 
 void glBlendWidget::updateFaces() {
-    _faces.clear();
+	_faces.clear();
 
-    if(src() == 0 or dst() == 0)
-        return;
+	if(src() == 0 or dst() == 0)
+		return;
 
-    assert(invariant());
+	assert(invariant());
 
-    assert(src()->resolution() != 0);
-    unsigned w(src()->resolution() - 1);
+	assert(src()->resolution() != 0);
+	unsigned w(src()->resolution() - 1);
 
-    generateTriangles(w, w, _faces);
+	generateTriangles(w, w, _faces);
 }
 
 
 QImage glBlendWidget::frame() {
-    QRTT rtt(this, maxImgDim());
-    paintGL();
-    return rtt.toImage();
+	QRTT rtt(this, maxImgDim());
+	paintGL();
+	return rtt.toImage();
 }
 
 
 void glBlendWidget::mousePressEvent(QMouseEvent* event) {
-    if(event->button() == Qt::LeftButton)
-        _mouse_press_pos = event->pos();
+	if(event->button() == Qt::LeftButton)
+		_mouse_press_pos = event->pos();
 }
 
 
 void glBlendWidget::mouseMoveEvent(QMouseEvent* event) {
-    if(not (event->buttons() & Qt::LeftButton))
-        return;
+	if(not (event->buttons() & Qt::LeftButton))
+		return;
 
-    if((event->pos() - _mouse_press_pos).manhattanLength() >=
-        QApplication::startDragDistance())
-        dragEvent();
+	if((event->pos() - _mouse_press_pos).manhattanLength() >=
+		QApplication::startDragDistance())
+		dragEvent();
 }
 
 
 void glBlendWidget::dragEvent() {
-    if(canPaint()) {
-        const QImage& img(frame());
+	if(canPaint()) {
+		const QImage& img(frame());
 
-        QMimeData* const mime_data(new QMimeData);
-        mime_data->setImageData(QVariant(img));
+		QMimeData* const mime_data(new QMimeData);
+		mime_data->setImageData(QVariant(img));
 
-        QDrag* const drag(new QDrag(this));
-        drag->setMimeData(mime_data);
-        drag->setPixmap(QPixmap::fromImage(img));
-        drag->exec();
-    }
+		QDrag* const drag(new QDrag(this));
+		drag->setMimeData(mime_data);
+		drag->setPixmap(QPixmap::fromImage(img));
+		drag->exec();
+	}
 }
 
 
 QSize glBlendWidget::maxImgDim() {
-    const GLint src(this->src()->tex());
-    const GLint dst(this->dst()->tex());
+	const GLint src(this->src()->tex());
+	const GLint dst(this->dst()->tex());
 
-    assert(src != 0 or dst != 0);
+	assert(src != 0 or dst != 0);
 
-    if(context() != QGLContext::currentContext())
-        makeCurrent();
+	if(context() != QGLContext::currentContext())
+		makeCurrent();
 
-    cgl::uvec2 src_dim, dst_dim;
+	cgl::uvec2 src_dim, dst_dim;
 
-    if(src != 0)
-        src_dim = cgl::dimensions(src);
+	if(src != 0)
+		src_dim = cgl::dimensions(src);
 
-    if(dst != 0)
-        dst_dim = cgl::dimensions(dst);
+	if(dst != 0)
+		dst_dim = cgl::dimensions(dst);
 
-    const cgl::uvec2& dim(cgl::max(src_dim, dst_dim));
-    assert(cgl::area(dim) != 0);
+	const cgl::uvec2& dim(cgl::max(src_dim, dst_dim));
+	assert(cgl::area(dim) != 0);
 
-    return QSize(dim.x, dim.y);
+	return QSize(dim.x, dim.y);
 }
 
 

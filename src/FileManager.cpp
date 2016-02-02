@@ -30,75 +30,75 @@
 
 
 FileManager::FileManager(QGLWidget* const ctx):
-    _ctx(ctx)
+	_ctx(ctx)
 {
-    assert(_ctx != 0);
+	assert(_ctx != 0);
 }
 
 
 FileManager::Resource::Resource(const QString& uri, const unsigned glid):
-    uri(uri),
-    name(QFileInfo(uri).fileName()),
-    glid(glid)
+	uri(uri),
+	name(QFileInfo(uri).fileName()),
+	glid(glid)
 {}
 
 
 FileManager::~FileManager() {
-    clear();
+	clear();
 }
 
 
 void FileManager::clear() {
-    const Iterator end(_resources.end());
+	const Iterator end(_resources.end());
 
-    for(Iterator i(_resources.begin()); i != end; ++i)
-        ctx()->deleteTexture(i->glid);
+	for(Iterator i(_resources.begin()); i != end; ++i)
+		ctx()->deleteTexture(i->glid);
 
-    _resources.clear();
+	_resources.clear();
 }
 
 
 void FileManager::add(const Resource& resource) {
-    _resources.push_back(resource);
-    emit filesChanged();
+	_resources.push_back(resource);
+	emit filesChanged();
 }
 
 
 bool FileManager::add(const QPixmap& img, const QString& uri) {
-    if(exists(uri))
-        return true;
+	if(exists(uri))
+		return true;
 
-    if(ctx()->context() != QGLContext::currentContext())
-        ctx()->makeCurrent();
+	if(ctx()->context() != QGLContext::currentContext())
+		ctx()->makeCurrent();
 
-    if(img.isNull())
-        return false;
+	if(img.isNull())
+		return false;
 
-    add(Resource(uri, ctx()->bindTexture(img)));
+	add(Resource(uri, ctx()->bindTexture(img)));
 
-    return true;
+	return true;
 }
 
 
 bool FileManager::loadImage(const QString& uri) {
-    if(uri.isEmpty())
-        return false;
+	if(uri.isEmpty())
+		return false;
 
-    if(exists(uri))
-        return true;
+	if(exists(uri))
+		return true;
 
-    return add(QPixmap(uri), uri);
+	return add(QPixmap(uri), uri);
 }
 
 
 bool FileManager::exists(const QString& uri) const {
-    const ConstIterator end(_resources.end());
+	const ConstIterator end(_resources.end());
 
-    for(ConstIterator i(_resources.begin()); i != end; ++i)
-        if(uri == i->uri)
-            return true;
+	for(ConstIterator i(_resources.begin()); i != end; ++i)
+		if(uri == i->uri)
+			return true;
 
-    return false;
+	return false;
 }
 
 

@@ -31,19 +31,19 @@
 
 
 struct Trig {
-    Trig(const unsigned a,
-         const unsigned b,
-         const unsigned c):
-        a(a),
-        b(b),
-        c(c)
-    {
-        assert(a != b);
-        assert(b != c);
-        assert(c != a);
-    }
+	Trig(const unsigned a,
+		 const unsigned b,
+		 const unsigned c):
+		a(a),
+		b(b),
+		c(c)
+	{
+		assert(a != b);
+		assert(b != c);
+		assert(c != a);
+	}
 
-    unsigned a, b, c;
+	unsigned a, b, c;
 };
 
 
@@ -55,31 +55,31 @@ typedef std::vector<Trig> Faces;
 
 
 void interpolate(const Mesh& a,
-                 const Mesh& b,
-                 const float& t,
-                 Mesh& msh);
+				 const Mesh& b,
+				 const float& t,
+				 Mesh& msh);
 
 
 bool glBlendAlphaEquals(const float& a);
 
 
 void draw(const int tex,
-          const Mesh& mesh,
-          const Mesh& tc,
-          const Faces& faces);
+		  const Mesh& mesh,
+		  const Mesh& tc,
+		  const Faces& faces);
 
 
 void generateTriangles(const unsigned xdiv,
-                       const unsigned ydiv,
-                       Faces& faces);
+					   const unsigned ydiv,
+					   Faces& faces);
 
 
 void drawBlended(const Mesh& src_mesh,
-                 const Mesh& dst_mesh,
-                 const Faces& faces,
-                 const int src_tex,
-                 const int dst_tex,
-                 const float t);
+				 const Mesh& dst_mesh,
+				 const Faces& faces,
+				 const int src_tex,
+				 const int dst_tex,
+				 const float t);
 
 
 #endif // UTILS_HPP
