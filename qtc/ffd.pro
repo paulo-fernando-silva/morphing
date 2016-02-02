@@ -1,5 +1,6 @@
 QT += opengl
 TEMPLATE = app
+QT_CONFIG -= no-pkg-config
 
 # Lets assume that everyone uses (the awesome) pkg-config.
 CONFIG += link_pkgconfig
@@ -22,4 +23,6 @@ RESOURCES += resources.qrc
 macx {
 	ICON = Icon.icns
 	QMAKE_INFO_PLIST = Info.plist
+# Same as the macports target or else it won't link "x86_64 not found..."
+	QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.11
 }
