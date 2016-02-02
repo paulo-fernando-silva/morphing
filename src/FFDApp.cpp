@@ -42,6 +42,7 @@
 #include <QToolBar>
 #include <QCheckBox>
 #include <QGroupBox>
+#include <QMimeData>
 #include <QFileInfo>
 #include <QGLContext>
 #include <QStatusBar>
