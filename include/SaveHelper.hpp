@@ -57,7 +57,6 @@ private:
 	Blender::AnimDir _anim_dir;
 	bool _animated;
 	unsigned _fps;
-	float _t;
 	unsigned _max_fps;
 };
 

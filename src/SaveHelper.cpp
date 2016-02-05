@@ -52,7 +52,6 @@ void SaveHelper::saveBlenderState() {
 	_animated = _blender->animated();
 	_anim_dir = _blender->animationDirection();
 	_fps = _blender->fps();
-	_t = _blender->widget()->blendFactor();
 }
 
 
@@ -60,7 +59,6 @@ void SaveHelper::loadBlenderState() {
 	_blender->animated(_animated);
 	_blender->animationDirection(_anim_dir);
 	_blender->fps(_fps);
-	_blender->widget()->blendFactor(_t);
 }
 
 
@@ -68,7 +66,6 @@ void SaveHelper::setup() {
 	_blender->animated(false);
 	_blender->animationDirection(Blender::FRONT);
 	_blender->fps(std::min(std::max(_fps, MIN_FRAMES), _max_fps));
-	_blender->widget()->blendFactor(0.0f);
 }
 
 
