@@ -50,14 +50,10 @@ public:
 	}
 
 	unsigned width() const;
-
 	unsigned height() const;
-
 
 	QImage toImage() const;
 
-
-private:
 	void bind();
 	void unbind();
 

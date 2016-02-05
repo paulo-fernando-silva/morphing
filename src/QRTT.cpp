@@ -23,12 +23,17 @@
  */
 
 #include "QRTT.hpp"
-#include "glBlendWidget.hpp"
-#include "glFFDWidget.hpp"
 #include "cgl/glu.hpp"
+#include "cgl/vec.hpp"
 
 #include <QGLFramebufferObject>
 #include <cassert>
+
+// NOTE: Assuming RGBA format for images, as that is the default in Qt too:
+// http://doc.qt.io/qt-4.8/qglframebufferobject.html#QGLFramebufferObject-5
+static const GLenum QT_IMG_FMT(GL_RGBA8);
+static const unsigned ENCODING(GL_RGBA);
+static const unsigned BYTES_PER_PIXEL(4);
 
 
 QRTT::QRTT(QGLWidget* const widget, const QSize& dim):
@@ -36,11 +41,9 @@ QRTT::QRTT(QGLWidget* const widget, const QSize& dim):
 {
 	assert(_widget != 0);
 
-	if(_widget->context() != QGLContext::currentContext())
-		_widget->makeCurrent();
-
-	_fbo.reset(new QGLFramebufferObject(dim.width(), dim.height()));
-	_pixels.reset(new byte[dim.width() * dim.height() * 4]);
+	_fbo.reset(new QGLFramebufferObject(dim));
+	assert(_fbo->format().internalTextureFormat() == QT_IMG_FMT);
+	_pixels.reset(new byte[dim.width() * dim.height() * BYTES_PER_PIXEL]);
 
 	bind();
 }
@@ -62,21 +65,28 @@ unsigned QRTT::height() const {
 
 
 void QRTT::bind() {
+	if(_widget->context() != QGLContext::currentContext())
+		_widget->makeCurrent();
+
 	assert(_fbo->bind());
-	cgl::view2D(cgl::uvec2(), uvec2(width(), height()));
+
+	cgl::view2D(cgl::uvec2(), cgl::uvec2(width(), height()));
 }
 
 
 void QRTT::unbind() {
 	assert(_fbo->release());
-	const uvec2 dim(_widget->width(), _widget->height());
+	const cgl::uvec2 dim(_widget->width(), _widget->height());
 	cgl::view2D(cgl::uvec2(), dim);
 }
 
 
 void QRTT::grabPixels() {
-	glReadPixels(0, 0,  width(), height(), GL_RGBA,
-				 GL_UNSIGNED_BYTE, _pixels.get());
+	// A way to get a RGBA image using QGLWidget is:
+	// QGLWidget::convertToGLFormat(QGLWidget::grabFrameBuffer())
+	glReadPixels(0, 0, width(), height(),
+				 ENCODING, GL_UNSIGNED_BYTE,
+				 _pixels.get());
 }
 
 
