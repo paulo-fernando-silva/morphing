@@ -124,7 +124,7 @@ void drawBlended(const Mesh& src_mesh,
 		draw(src_tex, mesh, src_mesh, faces);
 	}
 
-	if(dst_tex != 0 and glBlendColor != 0) {
+	if(dst_tex != 0 and &glBlendColor != 0) {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
 
