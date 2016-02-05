@@ -25,7 +25,7 @@
 #include "cgl/glu.hpp"
 #include "glBlendWidget.hpp"
 #include "glFFDWidget.hpp"
-#include "QRTT.hpp"
+#include "QtUtils.hpp"
 
 #include <QDrag>
 #include <QPixmap>
@@ -119,9 +119,7 @@ void glBlendWidget::updateFaces() {
 
 
 QImage glBlendWidget::frame() {
-	QRTT rtt(this, maxImgDim());
-	paintGL();
-	return rtt.toImage();
+	return grabFrameBuffer();
 }
 
 
@@ -156,28 +154,37 @@ void glBlendWidget::dragEvent() {
 }
 
 
-QSize glBlendWidget::maxImgDim() {
-	const GLint src(this->src()->tex());
-	const GLint dst(this->dst()->tex());
-
-	assert(src != 0 or dst != 0);
+cgl::uvec2 glBlendWidget::dimensions(GLint tex) {
+	if(tex == 0)
+		return cgl::uvec2();
 
 	if(context() != QGLContext::currentContext())
 		makeCurrent();
 
-	cgl::uvec2 src_dim, dst_dim;
+	return cgl::dimensions(tex);
+}
 
-	if(src != 0)
-		src_dim = cgl::dimensions(src);
 
-	if(dst != 0)
-		dst_dim = cgl::dimensions(dst);
-
-	const cgl::uvec2& dim(cgl::max(src_dim, dst_dim));
-	assert(cgl::area(dim) != 0);
-
+QSize glBlendWidget::imgDim(const Extreme ext) {
+	const cgl::uvec2& src_dim(dimensions(src()->tex()));
+	const cgl::uvec2& dst_dim(dimensions(dst()->tex()));
+	const cgl::uvec2& dim(ext(src_dim, dst_dim));
 	return QSize(dim.x, dim.y);
 }
 
+
+QSize glBlendWidget::maxImgDim() {
+	return imgDim(&cgl::max);
+}
+
+
+QSize glBlendWidget::minImgDim() {
+	return imgDim(&cgl::min);
+}
+
+
+const Faces& glBlendWidget::faces() const {
+	return _faces;
+}
 
 

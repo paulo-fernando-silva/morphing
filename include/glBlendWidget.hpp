@@ -67,20 +67,15 @@ public:
 
 	void updateFaces();
 
-	// made public to help with rtt
-	void paintGL();
-
-	/**
-	 * @brief frame a SLOW but simple way of capturing the current frame
-	 * @return a QImage representing the widget's contents.
-	 * @pre #canPaint
-	 */
 	QImage frame();
 
 	bool canPaint() const;
 
 	QSize maxImgDim();
 
+	QSize minImgDim();
+
+	void paintGL(); // DEBUG
 
 signals:
 	void blendFactorChanged(float t);
@@ -91,19 +86,27 @@ public slots:
 
 
 protected:
+
+
 	void initializeGL();
 	void resizeGL(int width, int height);
 
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 
-	inline const Faces& faces() {
-		return _faces;
-	}
+	cgl::uvec2 dimensions(GLint tex);
+
+	const Faces& faces() const;
 
 	bool invariant() const;
 
 	void dragEvent();
+
+
+private:
+	typedef cgl::uvec2 (*Extreme)(const cgl::uvec2&, const cgl::uvec2&);
+
+	QSize imgDim(const Extreme ext);
 
 
 private:
