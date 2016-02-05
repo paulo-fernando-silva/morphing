@@ -25,17 +25,18 @@
 #ifndef ANIMATION_HPP
 #define ANIMATION_HPP
 
-#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_ptr.hpp> // TODO: Replace by c++11 unique_ptr
+#include <functional>
 #include <string>
 
 
 class Animation {
 public:
 	typedef unsigned char byte;
-
+	typedef std::function<bool(unsigned frame)> OnFrameAdded;
 	enum PixelFormat { RGBA, RGB };
 
-	Animation(PixelFormat format = RGBA);
+	Animation(OnFrameAdded callback = nullptr, PixelFormat format = RGBA);
 
 	~Animation();
 
@@ -73,6 +74,7 @@ private:
 	struct PImpl;
 	typedef boost::scoped_ptr<PImpl> PImplPtr;
 	PImplPtr _pimpl;
+	OnFrameAdded _frameCallback;
 };
 
 #endif // ANIMATION_HPP

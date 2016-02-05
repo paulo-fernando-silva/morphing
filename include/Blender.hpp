@@ -27,12 +27,14 @@
 
 #include <QWidget>
 #include <QString>
+#include <functional>
 
 
 class glBlendWidget;
 
 class QLabel;
 class QSlider;
+class Animation;
 
 
 class Blender : public QWidget {
@@ -86,12 +88,11 @@ public:
 	void frameNumber(const float n);
 	float frameNumber() const;
 
-	inline unsigned numberOfFrames() const {
-		return fps() * duration() / 1000;
-	}
+	unsigned unidirectionalNumberOfFrames() const;
+	unsigned bidirectionalNumberOfFrames() const;
+	unsigned totalNumberOfFrames() const;
 
-
-	bool save(const QString& uri);
+	void generate(Animation& animation);
 
 
 signals:

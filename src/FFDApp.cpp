@@ -24,6 +24,7 @@
 
 #include "FFDApp.hpp"
 #include "Blender.hpp"
+#include "Animation.hpp"
 #include "FFDWidget.hpp"
 #include "glFFDWidget.hpp"
 #include "FileManager.hpp"
@@ -54,6 +55,7 @@
 #include <QMessageBox>
 #include <QImageReader>
 #include <QRadioButton>
+#include <QProgressDialog>
 #include <QDragEnterEvent>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -697,14 +699,31 @@ bool FFDApp::saveImage(const QString& uri) {
 
 bool FFDApp::saveAnimation(const QString& uri) {
 	assert(not uri.isEmpty());
-
 	stopTimer();
-	const bool saved(_mix->save(uri));
-	startTimer();
+	statusBar()->showMessage("Saving Animation to '" + uri + "'...");
 
-	if(saved)
+	const unsigned number_of_frames(_mix->totalNumberOfFrames());
+	QProgressDialog progress("Generating animation...",
+							 "Cancel", 0, number_of_frames, this);
+	progress.setMinimumDuration(0);
+	progress.setWindowModality(Qt::WindowModal);
+
+	Animation animation([&progress](int frame) {
+		progress.setValue(frame);
+		return not progress.wasCanceled();
+	});
+	animation.reserve(number_of_frames);
+
+	_mix->generate(animation);
+	progress.hide();
+
+	bool canceled(animation.frameCount() != number_of_frames);
+	bool saved(false);
+
+	if(not canceled and (saved = animation.save(uri.toStdString())))
 		_anim_uri = uri;
 
+	startTimer();
 	return saved;
 }
 

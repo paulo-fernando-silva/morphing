@@ -40,8 +40,9 @@ struct Animation::PImpl {
 };
 
 
-Animation::Animation(PixelFormat format):
-	_pimpl(new PImpl)
+Animation::Animation(OnFrameAdded callback, PixelFormat format)
+	: _pimpl(new PImpl)
+	, _frameCallback(callback)
 {
 	static bool once(false);
 
@@ -73,6 +74,9 @@ bool Animation::addFrame(const unsigned w,
 				  << e.what() << std::endl;
 		return false;
 	}
+
+	if(_frameCallback != nullptr)
+		return _frameCallback(_pimpl->_frames.size());
 
 	return true;
 }

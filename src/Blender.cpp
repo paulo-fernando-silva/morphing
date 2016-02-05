@@ -29,7 +29,6 @@
 #include "glBlendWidget.hpp"
 #include "SignalBlocker.hpp"
 
-#include <QProgressDialog>
 #include <QGridLayout>
 #include <QSlider>
 #include <QLabel>
@@ -108,7 +107,7 @@ void Blender::update() {
 
 
 void Blender::stepAnimation() {
-	const float num_frames(numberOfFrames());
+	const float num_frames(unidirectionalNumberOfFrames());
 	float frame_number(frameNumber());
 
 	assert(0.0f <= frame_number and frame_number < num_frames);
@@ -161,7 +160,7 @@ void Blender::fps(int f) {
 
 
 void Blender::frameNumber(const float n) {
-	const unsigned number_of_frames(numberOfFrames());
+	const unsigned number_of_frames(unidirectionalNumberOfFrames());
 	assert(n < number_of_frames);
 	const float t(n / (number_of_frames - 1));
 	widget()->blendFactor(t);
@@ -169,7 +168,7 @@ void Blender::frameNumber(const float n) {
 
 
 float Blender::frameNumber() const {
-	const unsigned number_of_frames(numberOfFrames());
+	const unsigned number_of_frames(unidirectionalNumberOfFrames());
 	assert(number_of_frames != 0);
 	const float n(widget()->blendFactor() * (number_of_frames - 1));
 	return n;
@@ -196,18 +195,10 @@ void Blender::blendFactorChanged(float t) {
 
 
 
-bool Blender::save(const QString& uri) {
-	unsigned number_of_frames(numberOfFrames());
+void Blender::generate(Animation& animation) {
+	unsigned number_of_frames(totalNumberOfFrames());
 	assert(number_of_frames != 0);
 
-	if(bidirectional())
-		number_of_frames = number_of_frames * 2 - 1;
-
-	Animation animation;
-	animation.reserve(number_of_frames);
-	QProgressDialog progress("Saving...", "Cancel", 0, number_of_frames, this);
-	progress.setMinimumDuration(0);
-	progress.setWindowModality(Qt::WindowModal);
 	const SaveHelper sh(this, number_of_frames);
 	const unsigned delay(sh.delay());
 
@@ -217,20 +208,29 @@ bool Blender::save(const QString& uri) {
 	for(unsigned i(0); i != number_of_frames; ++i) {
 		rtt.bind();
 		widget()->updateGL();
-
 		rtt.grabPixels();
+
 		if(not animation.addFrame(w, h, rtt.pixels().get(), delay))
-			return false;
+			return;
 
 		stepAnimation();
-		progress.setValue(i);
-
-		if(progress.wasCanceled())
-			return false;
 	}
-
-	progress.hide();
-
-	return animation.save(uri.toStdString());
 }
 
+
+unsigned Blender::unidirectionalNumberOfFrames() const {
+	return fps() * duration() / 1000;
+}
+
+
+unsigned Blender::bidirectionalNumberOfFrames() const {
+	return unidirectionalNumberOfFrames() * 2 - 1;
+}
+
+
+unsigned Blender::totalNumberOfFrames() const {
+	if(bidirectional())
+		return bidirectionalNumberOfFrames();
+
+	return unidirectionalNumberOfFrames();
+}

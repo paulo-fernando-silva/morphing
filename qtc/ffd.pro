@@ -1,6 +1,7 @@
 QT += opengl
 TEMPLATE = app
 QT_CONFIG -= no-pkg-config
+CONFIG += c++11
 
 # Lets assume that everyone uses (the awesome) pkg-config.
 CONFIG += link_pkgconfig
