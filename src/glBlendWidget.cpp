@@ -25,7 +25,6 @@
 #include "cgl/glu.hpp"
 #include "glBlendWidget.hpp"
 #include "glFFDWidget.hpp"
-#include "QtUtils.hpp"
 
 #include <QDrag>
 #include <QPixmap>

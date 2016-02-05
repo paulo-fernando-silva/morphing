@@ -91,12 +91,10 @@ const unsigned FPS_STEP(1);
 const unsigned MIN_FPS(0);
 const unsigned MAX_FPS(60);
 
-const unsigned DEFAULT_LEN(1000);
 const unsigned LEN_STEP(100);
 const unsigned MIN_LEN(LEN_STEP);
 const unsigned MAX_LEN(10000);
 
-const unsigned DEFAULT_RES(10);
 const unsigned RES_STEP(1);
 const unsigned MIN_RES(2);
 const unsigned MAX_RES(100);
@@ -698,6 +696,8 @@ bool FFDApp::saveImage(const QString& uri) {
 
 
 bool FFDApp::saveAnimation(const QString& uri) {
+	assert(not uri.isEmpty());
+
 	stopTimer();
 	const bool saved(_mix->save(uri));
 	startTimer();
