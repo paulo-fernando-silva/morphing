@@ -29,23 +29,28 @@
 #include <iostream>
 
 
-const char* const RGBA("RGBA");
+const char* const FORMATS[] = { "RGBA", "RGB" };
+
 
 struct Animation::PImpl {
 	typedef Magick::Image Image;
 	typedef std::vector<Image> Frames;
 	Frames _frames;
+	Animation::PixelFormat format;
 };
 
 
-Animation::Animation():
+Animation::Animation(PixelFormat format):
 	_pimpl(new PImpl)
 {
 	static bool once(false);
+
 	if(not once) {
 		Magick::InitializeMagick(0);
 		once = true;
 	}
+
+	_pimpl->format = format;
 }
 
 
@@ -59,7 +64,8 @@ bool Animation::addFrame(const unsigned w,
 {
 	typedef Magick::Image Image;
 	try {
-		_pimpl->_frames.push_back(Image(w, h, RGBA, Magick::CharPixel, bytes));
+		const char* const fmt(FORMATS[_pimpl->format]);
+		_pimpl->_frames.push_back(Image(w, h, fmt, Magick::CharPixel, bytes));
 		_pimpl->_frames.back().animationDelay(delay);
 		_pimpl->_frames.back().flip();
 	} catch(const Magick::Exception& e) {

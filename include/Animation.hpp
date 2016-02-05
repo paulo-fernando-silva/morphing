@@ -33,7 +33,9 @@ class Animation {
 public:
 	typedef unsigned char byte;
 
-	Animation();
+	enum PixelFormat { RGBA, RGB };
+
+	Animation(PixelFormat format = RGBA);
 
 	~Animation();
 
@@ -45,10 +47,10 @@ public:
 	 * @param delay the duration of this frame in milliseconds
 	 * @return true if the frame was created successfully.
 	 */
-	bool addFrame(const unsigned w,
-				  const unsigned h,
-				  const byte* const bytes,
-				  const unsigned delay);
+	bool addFrame(unsigned w,
+				  unsigned h,
+				  const byte* bytes,
+				  unsigned delay);
 
 	unsigned frameCount();
 
