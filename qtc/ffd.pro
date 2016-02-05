@@ -15,7 +15,7 @@ CONFIG(release, debug|release) {
 	TARGET = Morphing_d
 }
 
-SOURCES = $$PWD/../src/*.cpp $$PWD/../src/cgl/*.cpp
+SOURCES = $$PWD/../src/*.cpp
 HEADERS = $$PWD/../include/*.hpp $$PWD/../include/cgl/*.hpp
 INCLUDEPATH += $$PWD/../include
 RESOURCES += resources.qrc
