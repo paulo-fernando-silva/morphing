@@ -72,11 +72,9 @@ public:
 
 	QSize fboDim();
 
-	const QRTT::BytePtr& pixels() const;
-
 	void beginAnimation(const QSize& size);
 
-	void paint();
+	void refresh();
 
 	QImage frame();
 

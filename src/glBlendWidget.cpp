@@ -198,17 +198,7 @@ void glBlendWidget::beginAnimation(const QSize& size) {
 }
 
 
-QImage toRGBA(const QImage& img) {
-	const QImage& image(img.mirrored());
-
-	if(image.format() != QImage::Format_RGBA8888)
-		return image.convertToFormat(QImage::Format_RGBA8888);
-
-	return image;
-}
-
-
-void glBlendWidget::paint() {
+void glBlendWidget::refresh() {
 	if(_rtt != nullptr)
 		_rtt->bind();
 
@@ -216,17 +206,13 @@ void glBlendWidget::paint() {
 }
 
 
-const QRTT::BytePtr& glBlendWidget::pixels() const {
-	assert(_rtt != nullptr);
-	return _rtt->grabPixels();
-}
-
-
 QImage glBlendWidget::frame() {
-	if(_rtt != nullptr)
-		return toRGBA(_rtt->image());
+	const QImage& img((_rtt != nullptr? _rtt->image() : grabFrameBuffer()));
 
-	return toRGBA(grabFrameBuffer());
+	if(img.format() != QImage::Format_RGBA8888)
+		return img.convertToFormat(QImage::Format_RGBA8888);
+
+	return img;
 }
 
 

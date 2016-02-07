@@ -68,7 +68,6 @@ bool Animation::addFrame(const unsigned w,
 		const char* const fmt(FORMATS[_pimpl->format]);
 		_pimpl->_frames.push_back(Image(w, h, fmt, Magick::CharPixel, bytes));
 		_pimpl->_frames.back().animationDelay(delay);
-		_pimpl->_frames.back().flip();
 	} catch(const Magick::Exception& e) {
 		std::cerr << "Animation::addFrame: Magick++ exception: "
 				  << e.what() << std::endl;

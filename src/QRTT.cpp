@@ -29,22 +29,12 @@
 #include <QGLFramebufferObject>
 #include <cassert>
 
-// NOTE: Assuming RGBA format for images, as that is the default in Qt too:
-// http://doc.qt.io/qt-4.8/qglframebufferobject.html#QGLFramebufferObject-5
-static const GLenum QT_IMG_FMT(GL_RGBA8);
-static const unsigned ENCODING(GL_RGBA);
-static const unsigned BYTES_PER_PIXEL(4);
-
 
 QRTT::QRTT(QGLWidget* const widget, const QSize& dim):
 	_widget(widget)
 {
 	assert(_widget != 0);
-
 	_fbo.reset(new QGLFramebufferObject(dim));
-	assert(_fbo->format().internalTextureFormat() == QT_IMG_FMT);
-	_pixels.reset(new byte[dim.width() * dim.height() * BYTES_PER_PIXEL]);
-
 	bind();
 }
 
@@ -86,27 +76,6 @@ void QRTT::unbind() {
 }
 
 
-const QRTT::BytePtr& QRTT::grabPixels() {
-	cachePixels();
-	return cachedPixels();
-}
-
-
-void QRTT::cachePixels() {
-	glReadPixels(0, 0, width(), height(),
-				 ENCODING, GL_UNSIGNED_BYTE,
-				 _pixels.get());
-}
-
-
 QImage QRTT::image() const {
 	return _fbo->toImage();
 }
-
-
-const QRTT::BytePtr& QRTT::cachedPixels() const {
-	return _pixels;
-}
-
-
-

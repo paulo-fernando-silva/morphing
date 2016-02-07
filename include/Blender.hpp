@@ -40,7 +40,7 @@ class Animation;
 class Blender : public QWidget {
 	Q_OBJECT
 public:
-	enum AnimDir {FRONT = 1, BACK = -1};
+	enum AnimDir { FRONT = 1, BACK = -1 };
 
 	Blender(QWidget* const parent, const QString& title);
 
@@ -52,8 +52,7 @@ public:
 
 	glBlendWidget* widget() const;
 
-	// animation duration in milliseconds
-	unsigned duration() const;
+	unsigned duration() const; // animation duration in milliseconds
 
 	unsigned fps() const;
 

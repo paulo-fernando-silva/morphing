@@ -194,8 +194,6 @@ void Blender::blendFactorChanged(float t) {
 }
 
 
-#include <chrono>
-
 void Blender::generate(Animation& animation) {
 	unsigned number_of_frames(totalNumberOfFrames());
 	assert(number_of_frames != 0);
@@ -205,31 +203,18 @@ void Blender::generate(Animation& animation) {
 
 	widget()->beginAnimation(widget()->maxImgDim());
 
-auto start = std::chrono::high_resolution_clock::now(); // DEBUG
-
 	for(unsigned i(0); i != number_of_frames; ++i) {
-		widget()->paint();
+		widget()->refresh();
 
-		const QSize& sz(widget()->fboDim());
-		const unsigned w(sz.width());
-		const unsigned h(sz.height());
-		const QRTT::BytePtr& px(widget()->pixels());
+		const QImage& img(widget()->frame());
 
-		if(not animation.addFrame(w, h, px.get(), delay))
+		if(not animation.addFrame(img.width(), img.height(), img.bits(), delay))
 			return;
-
-//		const QImage& img(widget()->frame());
-//		if(not animation.addFrame(img.width(), img.height(), img.bits(), delay))
-//			return;
 
 		stepAnimation();
 	}
 
 	widget()->endAnimation();
-
-auto end = std::chrono::high_resolution_clock::now();
-const std::chrono::duration<double> diff{end - start};
-std::cout << "Time: " << diff.count() << "s\n";
 }
 
 

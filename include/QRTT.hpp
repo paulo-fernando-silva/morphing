@@ -43,16 +43,11 @@ public:
 
 	~QRTT();
 
-	void cachePixels();
-
-	const BytePtr& cachedPixels() const;
-
-	const BytePtr& grabPixels();
 
 	unsigned width() const;
 	unsigned height() const;
-	QSize size() const;
 
+	QSize size() const;
 	QImage image() const;
 
 	void bind();
@@ -64,7 +59,6 @@ private:
 
 	typedef std::unique_ptr<QGLFramebufferObject> FBOPtr;
 	QGLWidget* _widget;
-	BytePtr _pixels;
 	FBOPtr _fbo;
 };
 
