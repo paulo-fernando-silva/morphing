@@ -2,8 +2,7 @@
 
 : ${1:?"bundle name must be given."}
 bundle="$1"
-: ${2:?"macdeployqt must be given"}
-deploy="$2"
+deploy="${2:-macdeployqt}"
 
 ${deploy} "${bundle}"
 
