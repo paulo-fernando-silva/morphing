@@ -23,8 +23,8 @@
  */
 
 #include "QRTT.hpp"
-#include "cgl/glu.hpp"
-#include "cgl/vec.hpp"
+#include "glu.hpp"
+#include "vec.hpp"
 
 #include <QGLFramebufferObject>
 #include <cassert>
@@ -95,6 +95,9 @@ QImage QRTT::toImage() const {
 }
 
 
+const QRTT::BytePtr& QRTT::pixels() const {
+	return _pixels;
+}
 
 
 

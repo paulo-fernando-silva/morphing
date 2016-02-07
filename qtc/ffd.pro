@@ -17,7 +17,7 @@ CONFIG(release, debug|release) {
 }
 
 SOURCES = $$PWD/../src/*.cpp
-HEADERS = $$PWD/../include/*.hpp $$PWD/../include/cgl/*.hpp
+HEADERS = $$PWD/../include/*.hpp
 INCLUDEPATH += $$PWD/../include
 RESOURCES += resources.qrc
 

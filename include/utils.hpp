@@ -25,7 +25,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include "cgl/vec.hpp"
+#include "vec.hpp"
 #include <vector>
 #include <cassert>
 

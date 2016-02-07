@@ -25,7 +25,7 @@
 #ifndef GLU_HPP
 #define GLU_HPP
 
-#include "cgl/vec.hpp"
+#include "vec.hpp"
 #include <GL/gl.h>
 #include <string>
 

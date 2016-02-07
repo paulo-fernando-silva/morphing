@@ -22,10 +22,10 @@
  * THE SOFTWARE.
  */
 
-#include "glFFDWidget.hpp"
-#include "cgl/glu.hpp"
-#include "SignalBlocker.hpp"
+#include "glu.hpp"
 #include "QRTT.hpp"
+#include "glFFDWidget.hpp"
+#include "SignalBlocker.hpp"
 
 #include <QUrl>
 #include <QDrag>
@@ -286,7 +286,7 @@ bool glFFDWidget::saveMesh(std::ostream& out) {
 
 	clearModification();
 
-	return out;
+	return out.good();
 }
 
 

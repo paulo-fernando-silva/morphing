@@ -23,7 +23,7 @@
  */
 
 #include "utils.hpp"
-#include "cgl/glu.hpp"
+#include "glu.hpp"
 #include <iostream>
 #include <cmath>
 

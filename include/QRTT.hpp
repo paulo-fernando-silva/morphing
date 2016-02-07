@@ -27,8 +27,8 @@
 
 #include <QSize>
 #include <QImage>
-#include <boost/scoped_ptr.hpp>
-#include <boost/scoped_array.hpp>
+#include <memory>
+
 
 class QGLWidget;
 class QGLFramebufferObject;
@@ -37,7 +37,7 @@ class QGLFramebufferObject;
 class QRTT {
 public:
 	typedef unsigned char byte;
-	typedef boost::scoped_array<byte> BytePtr;
+	typedef std::unique_ptr<byte> BytePtr;
 
 	QRTT(QGLWidget* const widget, const QSize& dim);
 
@@ -45,9 +45,7 @@ public:
 
 	void grabPixels();
 
-	inline const BytePtr& pixels() const {
-		return _pixels;
-	}
+	const BytePtr& pixels() const;
 
 	unsigned width() const;
 	unsigned height() const;
@@ -59,7 +57,10 @@ public:
 
 
 private:
-	typedef boost::scoped_ptr<QGLFramebufferObject> FBOPtr;
+	QRTT(QRTT&) = delete;
+	QRTT& operator=(QRTT&) = delete;
+
+	typedef std::unique_ptr<QGLFramebufferObject> FBOPtr;
 	QGLWidget* _widget;
 	BytePtr _pixels;
 	FBOPtr _fbo;

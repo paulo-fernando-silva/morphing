@@ -25,7 +25,7 @@
 #ifndef ANIMATION_HPP
 #define ANIMATION_HPP
 
-#include <boost/scoped_ptr.hpp> // TODO: Replace by c++11 unique_ptr
+#include <memory>
 #include <functional>
 #include <string>
 
@@ -72,7 +72,7 @@ public:
 
 private:
 	struct PImpl;
-	typedef boost::scoped_ptr<PImpl> PImplPtr;
+	typedef std::unique_ptr<PImpl> PImplPtr;
 	PImplPtr _pimpl;
 	OnFrameAdded _frameCallback;
 };

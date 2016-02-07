@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "cgl/glu.hpp"
+#include "glu.hpp"
 
 #include <iostream>
 #include <iomanip>

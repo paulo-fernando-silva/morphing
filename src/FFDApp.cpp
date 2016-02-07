@@ -979,6 +979,26 @@ void FFDApp::stopTimer() {
 }
 
 
+Blender* FFDApp::mix() const {
+	return _mix;
+}
+
+
+FFDWidget* FFDApp::src() const {
+	return _src;
+}
+
+
+FFDWidget* FFDApp::dst() const {
+	return _dst;
+}
+
+
+const FFDApp::FileManagerPtr& FFDApp::mgr() const {
+	return _file_mgr;
+}
+
+
 /* *****************************************************************************
  * Extra aux stuff
  * ****************************************************************************/

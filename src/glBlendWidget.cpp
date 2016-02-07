@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  */
 
-#include "cgl/glu.hpp"
-#include "glBlendWidget.hpp"
+#include "glu.hpp"
 #include "glFFDWidget.hpp"
+#include "glBlendWidget.hpp"
 
 #include <QDrag>
 #include <QPixmap>

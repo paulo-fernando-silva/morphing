@@ -28,7 +28,7 @@
 #include <QIcon>
 #include <QString>
 #include <QMainWindow>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 class FFDWidget;
@@ -50,7 +50,7 @@ class QXmlStreamReader;
 class FFDApp : public QMainWindow {
 	Q_OBJECT
 public:
-	typedef boost::shared_ptr<FileManager> FileManagerPtr;
+	typedef std::shared_ptr<FileManager> FileManagerPtr;
 
 	FFDApp();
 	~FFDApp();
@@ -62,21 +62,13 @@ public:
 	bool saveImage(const QString& uri);
 	bool saveAnimation(const QString& uri);
 
-	inline Blender* mix() const {
-		return _mix;
-	}
+	Blender* mix() const;
 
-	inline FFDWidget* src() const {
-		return _src;
-	}
+	FFDWidget* src() const;
 
-	inline FFDWidget* dst() const {
-		return _dst;
-	}
+	FFDWidget* dst() const;
 
-	inline const FileManagerPtr& mgr() const {
-		return _file_mgr;
-	}
+	const FileManagerPtr& mgr() const;
 
 
 public slots:

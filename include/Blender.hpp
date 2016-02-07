@@ -50,39 +50,27 @@ public:
 	void clear();
 
 
-	inline glBlendWidget* widget() const {
-		return _widget;
-	}
+	glBlendWidget* widget() const;
 
 	// animation duration in milliseconds
-	inline unsigned duration() const {
-		return _duration;
-	}
+	unsigned duration() const;
 
-	inline unsigned fps() const {
-		return _fps;
-	}
+	unsigned fps() const;
 
 
 	void animationDirection(const AnimDir dir);
 
-	inline AnimDir animationDirection() const {
-		return _anim_dir;
-	}
+	AnimDir animationDirection() const;
 
 
 	void bidirectional(const bool state);
 
-	inline bool bidirectional() const {
-		return _bidirectional;
-	}
+	bool bidirectional() const;
 
 
 	void animated(const bool state);
 
-	inline bool animated() const {
-		return _animated;
-	}
+	bool animated() const;
 
 
 	void frameNumber(const float n);
@@ -112,9 +100,7 @@ private:
 	void stepAnimation();
 	float t(const unsigned frame_number) const;
 
-	inline QSlider* slider() const {
-		return _slider;
-	}
+	QSlider* slider() const;
 
 
 private:

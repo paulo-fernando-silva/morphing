@@ -23,7 +23,6 @@
  */
 
 #include "SaveHelper.hpp"
-#include "glBlendWidget.hpp"
 
 #include <algorithm>
 #include <cassert>

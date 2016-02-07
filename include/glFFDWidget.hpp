@@ -26,7 +26,7 @@
 #define GLWIDGET_HPP
 
 
-#include "cgl/vec.hpp"
+#include "vec.hpp"
 
 #include <QPoint>
 #include <QString>

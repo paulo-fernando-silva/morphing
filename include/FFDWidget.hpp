@@ -27,7 +27,7 @@
 
 #include <QWidget>
 #include <QString>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 class glFFDWidget;
@@ -41,7 +41,7 @@ class QGLWidget;
 class FFDWidget : public QWidget {
 	Q_OBJECT
 public:
-	typedef boost::shared_ptr<FileManager> FileManagerPtr;
+	typedef std::shared_ptr<FileManager> FileManagerPtr;
 
 	FFDWidget(QWidget* const parent,
 			  const QString& title,

@@ -234,3 +234,38 @@ unsigned Blender::totalNumberOfFrames() const {
 
 	return unidirectionalNumberOfFrames();
 }
+
+
+glBlendWidget* Blender::widget() const {
+	return _widget;
+}
+
+
+unsigned Blender::duration() const {
+	return _duration;
+}
+
+
+unsigned Blender::fps() const {
+	return _fps;
+}
+
+
+Blender::AnimDir Blender::animationDirection() const {
+	return _anim_dir;
+}
+
+
+bool Blender::bidirectional() const {
+	return _bidirectional;
+}
+
+
+bool Blender::animated() const {
+	return _animated;
+}
+
+
+QSlider* Blender::slider() const {
+	return _slider;
+}
