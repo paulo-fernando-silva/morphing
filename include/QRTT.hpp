@@ -43,18 +43,20 @@ public:
 
 	~QRTT();
 
-	void grabPixels();
+	void cachePixels();
 
-	const BytePtr& pixels() const;
+	const BytePtr& cachedPixels() const;
+
+	const BytePtr& grabPixels();
 
 	unsigned width() const;
 	unsigned height() const;
+	QSize size() const;
 
-	QImage toImage() const;
+	QImage image() const;
 
 	void bind();
 	void unbind();
-
 
 private:
 	QRTT(QRTT&) = delete;

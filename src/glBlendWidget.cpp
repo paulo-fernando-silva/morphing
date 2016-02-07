@@ -23,6 +23,7 @@
  */
 
 #include "glu.hpp"
+#include "QRTT.hpp"
 #include "glFFDWidget.hpp"
 #include "glBlendWidget.hpp"
 
@@ -33,6 +34,7 @@
 #include <QApplication>
 
 #include <algorithm>
+#include <cassert>
 
 
 const color CLEAR_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -117,11 +119,6 @@ void glBlendWidget::updateFaces() {
 }
 
 
-QImage glBlendWidget::frame() {
-	return grabFrameBuffer();
-}
-
-
 void glBlendWidget::mousePressEvent(QMouseEvent* event) {
 	if(event->button() == Qt::LeftButton)
 		_mouse_press_pos = event->pos();
@@ -182,8 +179,73 @@ QSize glBlendWidget::minImgDim() {
 }
 
 
+QSize glBlendWidget::fboDim() {
+	if(_rtt != nullptr)
+		return _rtt->size();
+
+	return size();
+}
+
+
 const Faces& glBlendWidget::faces() const {
 	return _faces;
 }
 
+
+void glBlendWidget::beginAnimation(const QSize& size) {
+	assert(_rtt == nullptr);
+	_rtt.reset(new QRTT(this, size));
+}
+
+
+QImage toRGBA(const QImage& img) {
+	const QImage& image(img.mirrored());
+
+	if(image.format() != QImage::Format_RGBA8888)
+		return image.convertToFormat(QImage::Format_RGBA8888);
+
+	return image;
+}
+
+
+void glBlendWidget::paint() {
+	if(_rtt != nullptr)
+		_rtt->bind();
+
+	paintGL();
+}
+
+
+const QRTT::BytePtr& glBlendWidget::pixels() const {
+	assert(_rtt != nullptr);
+	return _rtt->grabPixels();
+}
+
+
+QImage glBlendWidget::frame() {
+	if(_rtt != nullptr)
+		return toRGBA(_rtt->image());
+
+	return toRGBA(grabFrameBuffer());
+}
+
+
+void glBlendWidget::endAnimation() {
+	_rtt.reset(nullptr);
+}
+
+
+glFFDWidget* glBlendWidget::src() const {
+	return _src;
+}
+
+
+glFFDWidget* glBlendWidget::dst() const {
+	return _dst;
+}
+
+
+const float& glBlendWidget::blendFactor() const {
+	return _t;
+}
 

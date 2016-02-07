@@ -436,7 +436,7 @@ QImage glFFDWidget::frame() {
 
 		drawMesh(mesh_state);
 
-		return rtt.toImage();
+		return rtt.image();
 	}
 
 	return QImage();

@@ -55,12 +55,17 @@ QRTT::~QRTT() {
 
 
 unsigned QRTT::width() const {
-	return _fbo->size().width();
+	return size().width();
 }
 
 
 unsigned QRTT::height() const {
-	return _fbo->size().height();
+	return size().height();
+}
+
+
+QSize QRTT::size() const {
+	return _fbo->size();
 }
 
 
@@ -81,21 +86,25 @@ void QRTT::unbind() {
 }
 
 
-void QRTT::grabPixels() {
-	// A way to get a RGBA image using QGLWidget is:
-	// QGLWidget::convertToGLFormat(QGLWidget::grabFrameBuffer())
+const QRTT::BytePtr& QRTT::grabPixels() {
+	cachePixels();
+	return cachedPixels();
+}
+
+
+void QRTT::cachePixels() {
 	glReadPixels(0, 0, width(), height(),
 				 ENCODING, GL_UNSIGNED_BYTE,
 				 _pixels.get());
 }
 
 
-QImage QRTT::toImage() const {
+QImage QRTT::image() const {
 	return _fbo->toImage();
 }
 
 
-const QRTT::BytePtr& QRTT::pixels() const {
+const QRTT::BytePtr& QRTT::cachedPixels() const {
 	return _pixels;
 }
 

@@ -26,11 +26,13 @@
 #define GLBLENDWIDGET_HPP
 
 #include "utils.hpp"
+#include "QRTT.hpp"
 
 #include <QSize>
 #include <QPoint>
 #include <QImage>
 #include <QGLWidget>
+#include <memory>
 
 
 class glFFDWidget;
@@ -47,27 +49,20 @@ public:
 	void src(glFFDWidget* const w);
 
 
-	inline glFFDWidget* src() const {
-		return _src;
-	}
+	glFFDWidget* src() const;
 
 
 	void dst(glFFDWidget* const w);
 
 
-	inline glFFDWidget* dst() const {
-		return _dst;
-	}
+	glFFDWidget* dst() const;
 
 
-	inline const float& blendFactor() const {
-		return _t;
-	}
+	const float& blendFactor() const;
 
 
 	void updateFaces();
 
-	QImage frame();
 
 	bool canPaint() const;
 
@@ -75,7 +70,18 @@ public:
 
 	QSize minImgDim();
 
-	void paintGL(); // DEBUG
+	QSize fboDim();
+
+	const QRTT::BytePtr& pixels() const;
+
+	void beginAnimation(const QSize& size);
+
+	void paint();
+
+	QImage frame();
+
+	void endAnimation();
+
 
 signals:
 	void blendFactorChanged(float t);
@@ -86,7 +92,7 @@ public slots:
 
 
 protected:
-
+	void paintGL();
 
 	void initializeGL();
 	void resizeGL(int width, int height);
@@ -110,11 +116,15 @@ private:
 
 
 private:
+	typedef std::unique_ptr<QRTT> QRTTPtr;
+
 	float _t;
 	glFFDWidget* _src;
 	glFFDWidget* _dst;
 	Faces _faces;
 	QPoint _mouse_press_pos;
+	QRTTPtr _rtt;
+
 };
 
 
